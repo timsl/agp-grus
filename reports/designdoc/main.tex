@@ -1,0 +1,93 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{parskip}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{GPU Project design document}
+\author{Konrad Magnusson, Tim Olsson, Alex Sundström, Victor Ähdel}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In this project we aim to replicate the results in \emph{N-Body Simulation of the Formation of the Earth-Moon System} \cite{simulation_paper}.
+The paper is trying to simulate the giant impact hypothesis, which claims that the creation of our earth and moon stems from the collision of two earth sized planets.
+This theory originated from the fact that the earth and moon share a lot of isotopes, however the moon has a lot less iron. 
+We intend to replicate the paper by identifying and finding solutions to the possible subproblems that might pop up.
+Then we will likely split these subproblems up and work with them individually or as groups of two.
+
+\section{Envisioned methods}
+
+The implementation will use CUDA \cite{Cuda} for simulating the particles.
+We will implement some version of N-body simulation in order for the particles to affect each other in the correct way.
+Rendering the simulation will be achieved with OpenGL \cite{opengl}, using GLFW for the window mangement \cite{glfw}. 
+Here we will ensure that the viewer can move around in the space such that we can visualize the simulation from different angles and positions.
+
+We would also like to have CUDA-OpenGL interoperability in order to highly reduce the memory transfer necessary, and therefore highly speed up the entire program.
+The idea is to map OpenGL memory buffers into CUDA to allow all operations to persist on the GPU.
+This would minimize the memory latency between CPU and GPU and should provide a good performance boost.
+
+Another performance improvement that we will implement is to use instanced rendering in OpenGL.
+That allows us to draw a lot of objects with the same at the same time, which is very good since our particles are mostly identical aside from their position.
+
+It will be of use to introduce multithreading in our program. 
+Particularly, we may use one thread for updating the simulation at a certain simulation speed, and one for rendering at 60 frames per second.
+We may then change a variable in order to speed up or slow down the simulation.
+This could then help with debugging as we could move the simulation very quickly while using few particles and ensure that they eventually converge due to gravity.
+
+\section{Debugging/Testing method}
+
+We will simply have to visualize the particles in order to see whether it worked fully.
+It would be very difficult to see that it is completely correct without any visualization, but one could perhaps use graph cutting techniques in order to divide the particles into two groups and ensure that the moon and earth are separate.
+We will not do so however, since visualizing it is both more robust and more enlightening.
+
+In order to be able to test it for correctness we would have to run it for a lot of time steps, until it ends up forming a moon.
+For that, we need the simulation to be scalable, such that we do not need to run it for too long on our GPUs in the early stages of development.
+This is even more important in the early stages of optimization, since we at that point will not be able to use too many particles.
+One way to ensure that fewer particles would act the same is to for example scale G, the gravitational constant, in order for the particles to end up as a planet.
+
+\section{Challenges/Unclear points}
+
+\begin{itemize}
+\item CUDA/OpenGL interoperability might be difficult.
+\item N-body is generally $O(n^2)$, which is very slow, so we need to implement a very optimized variant.
+\item OpenGL might not be very happy to draw 100k spheres, so we might need simpler shapes for the particle.
+\item Creating a nice viewport in OpenGL such that one can move around the visualization fluidly might be difficult.
+\item Making everything realtime can in itself be a difficulty.
+\end{itemize}
+
+\section{Project time plan}
+
+The work to be done in OpenGL and CUDA is pretty separate.
+OpenGL is -- as mentioned previously -- very nice for debugging the CUDA code, so we would like that to be working fairly early anyhow.
+
+\begin{itemize}
+\item OpenGL workable on the 7th
+\item OpenGL done on 12th\\
+
+\item CUDA initialize a planet by the 5th
+\item CUDA initialize a spinning planet that does not eject all its particles on the 9th
+\item CUDA create two planets in separate places by the 10th
+\item CUDA simulate two planets that start inside each other by the 12th\\
+
+\item Fix CUDA-OpenGL interoperability sometime after 14th
+\item Fix scaling to larger amounts of particles sometime after 14th\\
+\end{itemize}
+
+\bibliographystyle{apalike}
+\bibliography{sample}
+
+\end{document}
