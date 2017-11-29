@@ -4,5 +4,5 @@ main.pdf: main.tex sample.bib
 
 .PHONY: clean
 clean:
-	rm main.pdf
-	rm main.bbl
+	rm -f main.pdf
+	rm -f main.bbl
