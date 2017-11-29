@@ -45,11 +45,8 @@ vector<Particle> particles;
 
 void move(vec3 dir){
     cam_pos += dir;
-    //cam_dir += dir;
-    //cam_up  += dir;
 }
 
-// angle in radians
 void rotate(vec3 axis, float angle){
     mat4 R = glm::rotate(angle, axis);
     cam_dir = vec3(R * vec4(cam_dir, 1.0f));
@@ -84,8 +81,6 @@ void init() {
 void release() {
     // Release the default VAO
     glDeleteVertexArrays(1, &g_default_vao);
-
-    // Do not forget to release any memory allocation here!
 }
 
 void display(GLFWwindow *window) {
@@ -95,11 +90,6 @@ void display(GLFWwindow *window) {
 
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //printf("GLFW triggered the display() callback!\n");
-
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    // Your rendering code must be here!
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     glUseProgram(shaderProgram);
     glBindVertexArray(g_default_vao);
 
@@ -138,7 +128,6 @@ void cursor_pos_callback(GLFWwindow *window, double xpos, double ypos){
 
 void keypress_cb(GLFWwindow *window, int key, int scancode, int action, int mods){
     //if (action == GLFW_PRESS) {
-        //cout << "key pressed: " << key << endl;
         switch(key){
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
