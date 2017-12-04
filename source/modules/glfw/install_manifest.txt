@@ -1,8 +1,0 @@
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/include/GLFW/glfw3.h
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/include/GLFW/glfw3native.h
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/cmake/glfw3/glfw3Config.cmake
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/cmake/glfw3/glfw3ConfigVersion.cmake
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/cmake/glfw3/glfw3Targets.cmake
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/cmake/glfw3/glfw3Targets-noconfig.cmake
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/pkgconfig/glfw3.pc
-/home/qnrd/d/kth/gpu/ass3/modules/glfw/build/lib/libglfw3.a
