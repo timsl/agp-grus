@@ -1,31 +1,34 @@
-CPP     = ${GCC}
-GCC     = g++ -std=c++11 -Wall --pedantic
-CLANG   = clang++ -std=c++11 -Wall --pedantic
-INCDIR  = -I./src/ -I./src/util -I./src/sphere -I./src/state -I./glad/include/glad/
-LIBDIR  = -L ./bin/glad/lib64
-BINDIR  = ./bin
-OBJDIR  = $(BINDIR)/obj
-LIBS    = -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
-MKDIR   = mkdir -p
+GCC     := g++
+CLANG   := clang++
+CFLAGS   := -std=c++11 -Wall --pedantic
+CPP     := $(CLANG) $(CFLAGS)
 
+LIBDIR  := -L ./bin/glad/lib64
+BINDIR  := ./bin
+OBJDIR  := $(BINDIR)/obj
+SRCDIRS := src/ src/util/ src/sphere/ src/state/
+INCDIR  := $(addprefix -I./,$(SRCDIRS)) -I./glad/include/glad/
 
-all: setup bin/main.out
+LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
+MKDIR   := mkdir -p
+
+VPATH   := $(BINDIR) $(OBJDIR) $(SRCDIRS)
+SRCS    := $(wildcard src/**/*.cpp)
+OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o
+
+all: setup main
 
 bin/glad/glad.o:
 	cd glad && $(MAKE) BUILDDIR=../bin/glad
 
-bin/main.out: $(OBJDIR)/util.o $(OBJDIR)/sphere.o $(OBJDIR)/state.o $(BINDIR)/glad/glad.o
-	$(CPP) $(INCDIR) $(LIBDIR) src/main.cpp -o $(BINDIR)/main.out $(OBJDIR)/*.o $(LIBS)
-	chmod a+x $(BINDIR)/main.out
+main: $(OBJS)
+	$(CPP) $(INCDIR) $(LIBDIR) src/main.cpp -o $(BINDIR)/main $(OBJDIR)/*.o $(LIBS)
 
-$(OBJDIR)/state.o: src/state/state.cpp
-	$(CPP) $(INCDIR) -c src/state/state.cpp -o $@
+%.o: %.cpp %.hpp
+	$(CPP) $(INCDIR) -c $< -o $(OBJDIR)/$@
 
-$(OBJDIR)/sphere.o: src/sphere/sphere.cpp
-	$(CPP) $(INCDIR) -c src/sphere/sphere.cpp -o $@
-
-$(OBJDIR)/util.o: src/util/util.cpp
-	$(CPP) $(INCDIR) -c src/util/util.cpp -o $@
+# additional dependencies
+main sphere.o state.o util.o: common.hpp
 
 setup:
 	$(MKDIR) $(BINDIR) $(OBJDIR)
@@ -35,3 +38,8 @@ clean:
 
 rebuild: clean all
 
+ec: 
+	# $^
+	# $(VPATH)
+	# $(SRCS)
+	# $(OBJS)
