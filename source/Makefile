@@ -8,6 +8,7 @@ OBJDIR  = $(BINDIR)/obj
 LIBS    = -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
 MKDIR   = mkdir -p
 
+
 all: setup bin/main.out
 
 bin/glad/glad.o:
@@ -17,13 +18,13 @@ bin/main.out: $(OBJDIR)/util.o $(OBJDIR)/sphere.o $(OBJDIR)/state.o $(BINDIR)/gl
 	$(CPP) $(INCDIR) $(LIBDIR) src/main.cpp -o $(BINDIR)/main.out $(OBJDIR)/*.o $(LIBS)
 	chmod a+x $(BINDIR)/main.out
 
-$(OBJDIR)/state.o:
+$(OBJDIR)/state.o: src/state/state.cpp
 	$(CPP) $(INCDIR) -c src/state/state.cpp -o $@
 
-$(OBJDIR)/sphere.o:
+$(OBJDIR)/sphere.o: src/sphere/sphere.cpp
 	$(CPP) $(INCDIR) -c src/sphere/sphere.cpp -o $@
 
-$(OBJDIR)/util.o:
+$(OBJDIR)/util.o: src/util/util.cpp
 	$(CPP) $(INCDIR) -c src/util/util.cpp -o $@
 
 setup:
