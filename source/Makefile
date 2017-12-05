@@ -22,7 +22,7 @@ all: setup main
 bin/glad/glad.o:
 	cd glad && $(MAKE) BUILDDIR=../bin/glad
 
-main: $(OBJS)
+main: $(OBJS) main.cpp
 	$(CPP) $(INCDIR) $(LIBDIR) src/main.cpp -o $(BINDIR)/main $(OBJDIR)/*.o $(LIBS)
 
 %.o: %.cpp %.hpp

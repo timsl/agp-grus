@@ -1,9 +1,12 @@
 
 #include "common.hpp"
 #include "sphere.hpp"
-#include "util.hpp"
 #include "state.hpp"
+<<<<<<< HEAD
 #include "input.hpp"
+=======
+#include "util.hpp"
+>>>>>>> init_planets
 
 using namespace std;
 using namespace glm;
@@ -51,6 +54,9 @@ void init() {
   if (MVP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
+  world.create_planets(world.particles, 1, 2, 0.3f,
+                       glm::vec3(-3.0f, 0.0f, -5.0f),
+                       glm::vec3(3.0f, 0.0f, -5.0f));
 }
 
 void release() {
