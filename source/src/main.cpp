@@ -20,7 +20,7 @@ constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
 GLuint shader_program;
 
-int NUM_PARTICLES = 200;
+int NUM_PARTICLES = 400;
 
 WorldState world(NUM_PARTICLES);
 

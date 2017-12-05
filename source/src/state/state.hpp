@@ -44,7 +44,7 @@ struct WorldState {
   template <typename Iter>
   void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,
-                     char prop_type);
+                     char prop_type, float omega);
   WorldState(int n) : particles(n), particle_props(4) {}
 };
 
