@@ -1,8 +1,8 @@
 
 #include "common.hpp"
 #include "sphere.hpp"
-#include "util.hpp"
 #include "state.hpp"
+#include "util.hpp"
 
 using namespace std;
 using namespace glm;
@@ -52,7 +52,9 @@ void init() {
   if (MVP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
-  world.create_planets(world.particles, 1, 2, 0.3f, 0.7f, glm::vec3(-3.0f, 0.0f, -5.0f), glm::vec3(3.0f, 0.0f, -5.0f));
+  world.create_planets(world.particles, 1, 2, 0.3f,
+                       glm::vec3(-3.0f, 0.0f, -5.0f),
+                       glm::vec3(3.0f, 0.0f, -5.0f));
 }
 
 void release() {
@@ -191,7 +193,7 @@ int main(int argc, char **argv) {
   // Launch the main loop for rendering
   float dt = 1.0f;
   float t = 0.0f;
-  world.update(t, t);           // Ensure initialized
+  world.update(t, t); // Ensure initialized
   while (!glfwWindowShouldClose(window)) {
     t += dt;
     world.update(dt, t);

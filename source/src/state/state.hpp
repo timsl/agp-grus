@@ -40,10 +40,11 @@ struct WorldState {
   void update(float dt, float t);
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
-                      float procent_silicate, glm::vec3 planet_1_origin,
-                      glm::vec3 planet_2_origin);
+                      glm::vec3 planet_1_origin, glm::vec3 planet_2_origin);
   template <typename Iter>
-  void create_sphere(Iter start, Iter end, float radius_1, float radius_2, glm::vec3 planet_origin, glm::vec3 inital_velocity, char prop_type);
+  void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
+                     glm::vec3 planet_origin, glm::vec3 inital_velocity,
+                     char prop_type);
   WorldState(int n) : particles(n), particle_props(4) {}
 };
 

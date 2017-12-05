@@ -18,9 +18,28 @@ void WorldState::update(float dt, float t) {
 
 void WorldState::create_planets(std::vector<Particle> &particles,
                                 float radius_1, float radius_2,
-                                float procent_iron, float procent_silicate,
-                                glm::vec3 planet_1_origin,
-                                glm::vec3 planet_2_origin) {}
+                                float procent_iron, glm::vec3 planet_1_origin,
+                                glm::vec3 planet_2_origin) {
+  int half = particles.size() / 2;
+  int nr_iron = half * procent_iron;
+  int nr_silicate = half - nr_iron;
+
+  auto start = particles.begin();
+  create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
+                glm::vec3(1.0f, 0.0f, 0.0f), iron_1);
+
+  start += nr_iron;
+  create_sphere(start, start + nr_silicate, radius_1, radius_2, planet_1_origin,
+                glm::vec3(1.0f, 0.0f, 0.0f), silicate_1);
+
+  start += nr_silicate;
+  create_sphere(start, start + nr_iron, 0, radius_1, planet_2_origin,
+                glm::vec3(-1.0f, 0.0f, 0.0f), iron_2);
+
+  start += nr_iron;
+  create_sphere(start, start + nr_silicate, radius_1, radius_2, planet_2_origin,
+                glm::vec3(-1.0f, 0.0f, 0.0f), silicate_2);
+}
 
 template <typename Iter>
 void WorldState::create_sphere(Iter start, Iter end, float radius_1,
@@ -29,7 +48,6 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
   // used to generate our random numbers
   std::default_random_engine generator;
   std::uniform_real_distribution<float> dist(0.0, 1.0);
-
 
   // silicate
   for (auto i = start; i != end; ++i) {
