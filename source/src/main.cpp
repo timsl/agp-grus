@@ -6,18 +6,15 @@
 #include "util.hpp"
 
 using namespace std;
-using namespace glm;
 using namespace agp;
-using namespace agp::glut;
 
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
 GLint MVP_loc = -1;
+GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
-
-GLuint shader_program;
 
 int DEFAULT_NUM_PARTICLES = 200;
 
@@ -89,9 +86,9 @@ void display(GLFWwindow *window) {
 
     // Render a sphere
     glUniform4f(color_loc, 0.5, 0.2, 0.0, 0.5);
-    glutSolidSphere(0.5f, 16, 8);
+    agp::glut::glutSolidSphere(0.5f, 16, 8);
     glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
-    glutWireSphere(0.5f, 16, 8);
+    agp::glut::glutWireSphere(0.5f, 16, 8);
   }
 
   // Swap buffers and force a redisplay

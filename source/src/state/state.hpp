@@ -2,6 +2,7 @@
 #define STATE_HPP
 
 #include "common.hpp"
+#include "heldactions.hpp"
 #include <math.h>
 #include <random>
 
@@ -39,10 +40,12 @@ struct WindowState {
   WindowState() : width(1280), height(720) {}
 };
 
+
 struct WorldState {
   CameraState cam;
   std::vector<Particle> particles;
   WindowState window;
+  HeldActions held;
   std::vector<ParticleProps> particle_props;
 
   void update(float dt, float t);

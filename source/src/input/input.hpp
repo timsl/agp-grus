@@ -2,6 +2,7 @@
 #define INPUT_HPP
 
 #include "common.hpp"
+#include "heldactions.hpp"
 #include "state.hpp"
 
 void resize_callback(GLFWwindow *win, int width, int height, WorldState *world);

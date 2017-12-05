@@ -1,3 +1,2 @@
 make the input affect some button_down struct, act on that per frame
-put world state in a make_unique or so so we can init it with N at run/starttime
 move in konrads mouse stuff

@@ -30,12 +30,16 @@ main: $(OBJS) main.cpp
 
 # additional dependencies
 main sphere.o state.o util.o input.o: common.hpp
+state.o input.o: heldactions.hpp
 
 setup:
-	$(MKDIR) $(BINDIR) $(OBJDIR)
+	@$(MKDIR) $(BINDIR) $(OBJDIR)
 
 clean:
 	$(RM) -rf $(BINDIR) $(OBJDIR)
+
+run: all
+	$(BASEDIR)/bin/main
 
 rebuild: clean all
 
