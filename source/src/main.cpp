@@ -3,6 +3,7 @@
 #include "sphere.hpp"
 #include "util.hpp"
 #include "state.hpp"
+#include "input.hpp"
 
 using namespace std;
 using namespace glm;
@@ -12,17 +13,15 @@ using namespace agp::glut;
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
 GLint MVP_loc = -1;
-int width = 1280;
-int height = 720;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
 GLuint shader_program;
 
-int NUM_PARTICLES = 200;
+int DEFAULT_NUM_PARTICLES = 200;
 
-WorldState world(NUM_PARTICLES);
+WorldState *world;
 
 void init() {
   // Generate and bind the default VAO
@@ -71,14 +70,14 @@ void display(GLFWwindow *window) {
   // Could cache it I guess, and only change on demand, but here is ok
 
   glm::vec3 camPos(0.0f, 0.0f, 2.0f);
-  camPos = glm::rotate(camPos, glm::radians(world.cam.angle),
+  camPos = glm::rotate(camPos, glm::radians(world->cam.angle),
                        glm::vec3(0.0f, 1.0f, 0.0f));
   glm::mat4 view = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f),
                                glm::vec3(0.0f, 1.0f, 0.0f));
   glm::mat4 proj = glm::perspective(
-      glm::radians(world.cam.fov), (float)width / (float)height, 0.1f, 1000.0f);
+      glm::radians(world->cam.fov), (float)world->window.width / (float)world->window.height, 0.1f, 1000.0f);
 
-  for (const auto &p : world.particles) {
+  for (const auto &p : world->particles) {
     glm::mat4 model;
     model = glm::translate(model, p.pos);
 
@@ -97,52 +96,16 @@ void display(GLFWwindow *window) {
   glfwPollEvents();
 }
 
-void resize_callback(GLFWwindow *win, int width, int height) {
-  ::width = width;
-  ::height = height;
-  glViewport(0, 0, width, height);
+void resize_callback_h(GLFWwindow *win, int width, int height){
+  resize_callback(win, width, height, world);
 }
-
-void keyboard_callback(GLFWwindow *win, int key, int, int action, int) {
-  // Not handling release just means the code below is a bit neater,
-  // since I'm not using it for any of the current buttons
-  if (action == GLFW_RELEASE)
-    return;
-
-  switch (key) {
-  case GLFW_KEY_ESCAPE:
-    glfwSetWindowShouldClose(win, 1);
-    break;
-  case GLFW_KEY_R:
-    world.cam.angle = 0.0f;
-    world.cam.fov = 90.0f;
-    break;
-  case GLFW_KEY_LEFT:
-    world.cam.angle -= 5.0f;
-    break;
-  case GLFW_KEY_RIGHT:
-    world.cam.angle += 5.0f;
-    break;
-  case GLFW_KEY_SLASH: // Where i expect + to be on swedish keyboard
-    world.cam.fov += 2.0f;
-    break;
-  case GLFW_KEY_MINUS:
-    world.cam.fov -= 2.0f;
-    break;
-  default:
-    const char *actionname = "ERROR_WEIRD_ACTION";
-    if (action == GLFW_PRESS) {
-      actionname = "Pressed";
-    } else if (action == GLFW_REPEAT) {
-      actionname = "Repeated";
-    } else if (action == GLFW_RELEASE) {
-      actionname = "Released";
-    }
-    printf("%s unbound key %d.\n", actionname, key);
-  }
+void keyboard_callback_h(GLFWwindow *win, int key, int, int action, int){
+  keyboard_callback(win, key, action, world);
 }
 
 int main(int argc, char **argv) {
+  world = new WorldState(DEFAULT_NUM_PARTICLES);
+  
   GLFWwindow *window = NULL;
 
   // Initialize GLFW
@@ -158,7 +121,7 @@ int main(int argc, char **argv) {
 
   // Open the window and create the context
   window =
-      glfwCreateWindow(width, height, "Applied GPU Programming", NULL, NULL);
+      glfwCreateWindow(world->window.width, world->window.height, "Applied GPU Programming", NULL, NULL);
 
   if (window == NULL) {
     fprintf(stderr, "Could not create window");
@@ -170,11 +133,11 @@ int main(int argc, char **argv) {
   glfwSwapInterval(1);
 
   // Capture the input events (e.g., keyboard)
-  glfwSetKeyCallback(window, keyboard_callback);
+  glfwSetKeyCallback(window, keyboard_callback_h);
   // glfwSetInputMode( ... );
 
   // Get window resizes
-  glfwSetWindowSizeCallback(window, resize_callback);
+  glfwSetWindowSizeCallback(window, resize_callback_h);
 
   // Init GLAD to be able to access the OpenGL API
   if (!gladLoadGL()) {
@@ -186,14 +149,14 @@ int main(int argc, char **argv) {
 
   // Initialize the 3D view
   init();
-
+  
   // Launch the main loop for rendering
   float dt = 1.0f;
   float t = 0.0f;
-  world.update(t, t);           // Ensure initialized
+  world->update(t, t);           // Ensure initialized
   while (!glfwWindowShouldClose(window)) {
     t += dt;
-    world.update(dt, t);
+    world->update(dt, t);
     display(window);
   }
 
@@ -204,5 +167,7 @@ int main(int argc, char **argv) {
   glfwDestroyWindow(window);
   glfwTerminate();
 
+  delete world;
+  
   return 0;
 }

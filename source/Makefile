@@ -6,7 +6,7 @@ CPP     := $(CLANG) $(CFLAGS)
 LIBDIR  := -L ./bin/glad/lib64
 BINDIR  := ./bin
 OBJDIR  := $(BINDIR)/obj
-SRCDIRS := src/ src/util/ src/sphere/ src/state/
+SRCDIRS := src/ src/util/ src/sphere/ src/state/ src/input/
 INCDIR  := $(addprefix -I./,$(SRCDIRS)) -I./glad/include/glad/
 
 LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
@@ -28,7 +28,7 @@ main: $(OBJS)
 	$(CPP) $(INCDIR) -c $< -o $(OBJDIR)/$@
 
 # additional dependencies
-main sphere.o state.o util.o: common.hpp
+main sphere.o state.o util.o input.o: common.hpp
 
 setup:
 	$(MKDIR) $(BINDIR) $(OBJDIR)
