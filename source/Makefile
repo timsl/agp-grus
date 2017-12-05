@@ -3,17 +3,18 @@ CLANG   := clang++
 CFLAGS   := -std=c++11 -Wall --pedantic
 CPP     := $(CLANG) $(CFLAGS)
 
-LIBDIR  := -L ./bin/glad/lib64
-BINDIR  := ./bin
+BASEDIR := $(PWD)
+LIBDIR  := -L $(BASEDIR)/bin/glad/lib64
+BINDIR  := $(BASEDIR)/bin
 OBJDIR  := $(BINDIR)/obj
 SRCDIRS := src/ src/util/ src/sphere/ src/state/ src/input/
-INCDIR  := $(addprefix -I./,$(SRCDIRS)) -I./glad/include/glad/
+INCDIR  := $(addprefix -I$(BASEDIR)/,$(SRCDIRS)) -I$(BASEDIR)/glad/include/glad/
 
 LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
 MKDIR   := mkdir -p
 
 VPATH   := $(BINDIR) $(OBJDIR) $(SRCDIRS)
-SRCS    := $(wildcard src/**/*.cpp)
+SRCS    := $(wildcard $(BASEDIR)/src/**/*.cpp)
 OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o
 
 all: setup main
