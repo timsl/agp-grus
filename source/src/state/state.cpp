@@ -33,6 +33,7 @@ void WorldState::create_planet(std::vector<Particle> &particles, size_t nr_inner
         particles[i].pos.x = planet_origin.x + Rp_1 * sqrt_u2 * std::cos(2 * M_PI * rho_3);
         particles[i].pos.y = planet_origin.y + Rp_1 * sqrt_u2 * std::sin(2 * M_PI * rho_3);
         particles[i].pos.z = planet_origin.z + Rp_1 * u;
+        particles[i].type = 0;
     }
    
     // silicate

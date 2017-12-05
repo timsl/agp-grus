@@ -52,6 +52,7 @@ void init() {
   if (MVP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
+  world.create_planet(world.particles, 50, 150, 1, 2, glm::vec3(0.0f, 0.0f,-5.0f));
 }
 
 void release() {

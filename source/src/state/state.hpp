@@ -6,6 +6,7 @@
 #include "common.hpp"
 
 const int PERIOD = 100;
+enum PlanetProperty : char {iron_1, silicate_1, iron_2, silicate_2};
 
 struct Particle {
   glm::vec3 pos;
