@@ -1,6 +1,8 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
+#include <random>
+#include <math.h>
 #include "common.hpp"
 
 const int PERIOD = 100;
@@ -8,6 +10,7 @@ const int PERIOD = 100;
 struct Particle {
   glm::vec3 pos;
   glm::vec3 velocity;
+  char type;
 };
 
 struct CameraState {
@@ -22,6 +25,7 @@ struct WorldState {
   std::vector<Particle> particles;
 
   void update(float dt, float t);
+  void create_planet(std::vector<Particle> &particles, size_t nr_inner, size_t nr_outer, float radius_1, float radius_2, glm::vec3 planet_origin);
   WorldState(int n) : particles(n) {}
 };
 
