@@ -30,3 +30,4 @@ source/bin/
 *.app
 
 ..git
+/source/compile_commands.json

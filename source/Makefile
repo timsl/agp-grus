@@ -1,7 +1,6 @@
-GCC     := g++
-CLANG   := clang++
-CFLAGS   := -std=c++11 -Wall --pedantic
-CPP     := $(CLANG) $(CFLAGS)
+CPP     := clang++
+CFLAGS  := -std=c++11 -Wall --pedantic
+CPPF    := $(CPP) $(CFLAGS)
 
 BASEDIR := $(PWD)
 LIBDIR  := -L $(BASEDIR)/bin/glad/lib64
@@ -24,10 +23,10 @@ bin/glad/glad.o:
 	cd glad && $(MAKE) BUILDDIR=../bin/glad
 
 moon: $(OBJS)
-	$(CPP) $(INCDIR) $(LIBDIR) $(OBJDIR)/*.o -o $(BINDIR)/moon $(LIBS)
+	$(CPPF) $(INCDIR) $(LIBDIR) $(OBJDIR)/*.o -o $(BINDIR)/moon $(LIBS)
 
 %.o: %.cpp
-	$(CPP) $(INCDIR) -c $< -o $(OBJDIR)/$@
+	$(CPPF) $(INCDIR) -c $< -o $(OBJDIR)/$@
 
 # additional dependencies
 main.o sphere.o state.o util.o input.o: common.hpp bin/glad/glad.o
