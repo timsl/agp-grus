@@ -2,11 +2,28 @@
 
 void WorldState::update(float dt, float t) {
   auto n = particles.size();
+  const float D = 376.78;
+  const float epsilon = 47.0975;
+  const double M[4] = {1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19),
+                       1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19)};
+  const double K[4] = {2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10),
+                       2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10)};
+  const float KRP[4] = {0.02, 0.01, 0.02, 0.01};
+  const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
 
   for (unsigned i = 0; i < n; ++i) {
     auto &p = particles[i];
+    for (size_t i = 0; i < n; ++i) {
+      auto &p_i = particles[i];
 
-    p.pos += p.velocity * dt;
+      for (size_t j = 0; j < n; ++j) {
+        if (j != i) {
+          auto &p_j = particles[j];
+          float r = glm::distance(p_i.pos, p_j.pos);
+        }
+      }
+      p_i.pos += p_i.velocity * dt;
+    }
   }
 }
 
@@ -18,9 +35,9 @@ void WorldState::create_planets(std::vector<Particle> &particles,
   int nr_iron = half * procent_iron;
   int nr_silicate = half - nr_iron;
 
-  //auto inital_velocity = glm::vec3(3.2416f, 0.0f, 0.0f); // km/s
+  // auto inital_velocity = glm::vec3(3.2416f, 0.0f, 0.0f); // km/s
   auto inital_velocity = glm::vec3(0.032416f, 0.0f, 0.0f); // km/s
-  float omega = 0.00844638888f;                          // rad s⁻1
+  float omega = 0.00844638888f;                            // rad s⁻1
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
