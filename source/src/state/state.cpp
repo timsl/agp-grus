@@ -2,14 +2,14 @@
 
 void WorldState::update(float dt) {
   auto n = particles.size();
-  const float D = 376.78;
-  const float epsilon = 47.0975;
+  const float D = 376.78f;
+  const float epsilon = 47.0975f;
   const double M[4] = {1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19),
                        1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19)};
-  const double K[4] = {2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10),
-                       2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10)};
+  const double K[4] = {5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13),
+                       5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13)};
   const float KRP[4] = {0.02, 0.01, 0.02, 0.01};
-  const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
+  const float SDP[4] = {0.002, 0.001, 0.002, 0.001};
   const double G = 6.67408 * std::pow(10, -11);
 
   for (size_t i = 0; i < n; ++i) {
@@ -21,6 +21,9 @@ void WorldState::update(float dt) {
         float r = glm::distance(p_i.pos, p_j.pos);
         auto force = glm::normalize(p_j.pos - p_i.pos);
 
+        int pi_t = (int)p_i.type;
+        int pj_t = (int)p_j.type;
+
         // If r is too small set it to epsilon
         if (r < epsilon) {
           r = epsilon;
@@ -28,52 +31,47 @@ void WorldState::update(float dt) {
 
         // Elements are not in contact
         if (D <= r) {
-          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2);
+          force *= G * M[pi_t] * M[pj_t] * std::pow(r, -2);
         }
         // Element are in contact but no shell is penetrated
-        else if (D - D * SDP[(int)p_i.type] <= r && r < D) {
-          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
-                   0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+        else if (D - D * SDP[pi_t] <= r && r < D) {
+          force *= G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+                   0.5f * (K[pi_t] + K[pj_t]) *
                        (std::pow(D, 2) - std::pow(r, 2));
         }
         // One shell has been penetrated
-        else if (D - D * SDP[(int)p_j.type] <= r &&
-                 r < D - D * SDP[(int)p_i.type]) {
+        else if (D - D * SDP[pj_t] <= r && r < D - D * SDP[pi_t]) {
           float next_r =
               glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
           // Seperation is decreasing
           if (next_r < r) {
-            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
-                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
-                         (std::pow(D, 2) - std::pow(r, 2));
+            force *=
+                G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+                0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
 
           }
           // Seperation is increasing
           else {
-            force *=
-                G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
-                0.5f *
-                    (K[(int)p_i.type] * KRP[(int)p_i.type] + K[(int)p_j.type]) *
-                    (std::pow(D, 2) - std::pow(r, 2));
+            force *= G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+                     0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
           }
         }
         // Both shells have been penetrated
-        else if (epsilon <= r && r < D - D * SDP[(int)p_j.type]) {
+        else if (epsilon <= r && r < D - D * SDP[pj_t]) {
           float next_r =
               glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
           // Seperation is decreasing
           if (next_r < r) {
-            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
-                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
-                         (std::pow(D, 2) - std::pow(r, 2));
+            force *=
+                G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+                0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
 
           }
           // Seperation is increasing
           else {
-            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
-                     0.5f *
-                         (K[(int)p_i.type] * KRP[(int)p_i.type] +
-                          K[(int)p_j.type] * KRP[(int)p_j.type]) *
+            force *= G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+                     0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t] * KRP[pj_t]) *
                          (std::pow(D, 2) - std::pow(r, 2));
           }
         }
@@ -93,7 +91,7 @@ void WorldState::create_planets(std::vector<Particle> &particles,
   int nr_silicate = half - nr_iron;
 
   auto inital_velocity = glm::vec3(-3.2416f, 0.0f, 0.0f); // km/s
-  float omega = 3.0973f / 360.0f;                            // rad s⁻1
+  float omega = 3.0973f / 360.0f;                         // rad s⁻1
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
