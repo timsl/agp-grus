@@ -2,11 +2,85 @@
 
 void WorldState::update(float dt, float t) {
   auto n = particles.size();
+  const float D = 376.78;
+  const float epsilon = 47.0975;
+  const double M[4] = {1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19),
+                       1.9549 * std::pow(10, 20), 7.4161 * std::pow(10, 19)};
+  const double K[4] = {2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10),
+                       2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10)};
+  const float KRP[4] = {0.02, 0.01, 0.02, 0.01};
+  const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
+  const double G = 6.67408 * std::pow(10, -11);
 
-  for (unsigned i = 0; i < n; ++i) {
-    auto &p = particles[i];
+  for (size_t i = 0; i < n; ++i) {
+    auto &p_i = particles[i];
 
-    p.pos += p.velocity * dt;
+    for (size_t j = 0; j < n; ++j) {
+      if (j != i) {
+        auto &p_j = particles[j];
+        float r = glm::distance(p_i.pos, p_j.pos);
+        auto force = glm::normalize(p_j.pos - p_i.pos);
+
+        // If r is too small set it to epsilon
+        if (r < epsilon) {
+          r = epsilon;
+        }
+
+        // Elements are not in contact
+        if (D <= r) {
+          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2);
+        }
+        // Element are in contact but no shell is penetrated
+        else if (D - D * SDP[(int)p_i.type] <= r && r < D) {
+          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                   0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                       (std::pow(D, 2) - std::pow(r, 2));
+        }
+        // One shell has been penetrated
+        else if (D - D * SDP[(int)p_j.type] <= r &&
+                 r < D - D * SDP[(int)p_i.type]) {
+          float next_r =
+              glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
+          // Seperation is decreasing
+          if (next_r < r) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
+
+          }
+          // Seperation is increasing
+          else {
+            force *=
+                G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                0.5f *
+                    (K[(int)p_i.type] * KRP[(int)p_i.type] + K[(int)p_j.type]) *
+                    (std::pow(D, 2) - std::pow(r, 2));
+          }
+        }
+        // Both shells have been penetrated
+        else if (epsilon <= r && r < D - D * SDP[(int)p_j.type]) {
+          float next_r =
+              glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
+          // Seperation is decreasing
+          if (next_r < r) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
+
+          }
+          // Seperation is increasing
+          else {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                     0.5f *
+                         (K[(int)p_i.type] * KRP[(int)p_i.type] +
+                          K[(int)p_j.type] * KRP[(int)p_j.type]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
+          }
+        }
+        p_i.velocity += force;
+      }
+    }
+    p_i.pos += p_i.velocity * dt;
   }
 }
 
