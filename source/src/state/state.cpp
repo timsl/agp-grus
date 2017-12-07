@@ -12,18 +12,15 @@ void WorldState::update(float dt, float t) {
   const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
 
   for (size_t i = 0; i < n; ++i) {
-    auto &p = particles[i];
-    for (size_t i = 0; i < n; ++i) {
-      auto &p_i = particles[i];
+    auto &p_i = particles[i];
 
-      for (size_t j = 0; j < n; ++j) {
-        if (j != i) {
-          auto &p_j = particles[j];
-          float r = glm::distance(p_i.pos, p_j.pos);
-        }
+    for (size_t j = 0; j < n; ++j) {
+      if (j != i) {
+        auto &p_j = particles[j];
+        float r = glm::distance(p_i.pos, p_j.pos);
       }
-      p_i.pos += p_i.velocity * dt;
     }
+    p_i.pos += p_i.velocity * dt;
   }
 }
 
