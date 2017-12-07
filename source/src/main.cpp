@@ -86,8 +86,8 @@ void display(GLFWwindow *window) {
     // Render a sphere
     glUniform4f(color_loc, 0.5, 0.2, 0.0, 0.5);
     agp::glut::glutSolidSphere(0.5f, 16, 8);
-    glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
-    agp::glut::glutWireSphere(0.5f, 16, 8);
+    // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
+    // agp::glut::glutWireSphere(0.5f, 16, 8);
   }
 
   // Swap buffers and force a redisplay
