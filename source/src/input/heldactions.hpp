@@ -26,5 +26,5 @@ struct HeldActions {
         move_forw(false), move_back(false), turn_left(false), turn_right(false),
         turn_up(false), turn_down(false), roll_right(false), roll_left(false){};
 };
-  
+
 #endif

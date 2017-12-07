@@ -76,10 +76,22 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
   printf("%s unbound key %d.\n", actionname, key);
 }
 
-void cursor_callback(GLFWwindow *win, float xpos, float ypos) {}
+constexpr double sensitivity = 0.1 * (M_PI / 180.0);
+void cursor_callback(GLFWwindow *win, double xpos, double ypos,
+                     WorldState *world) {
+  auto &c = world->cam;
+
+  auto x_diff = xpos - c.old_xpos;
+  c.old_xpos = xpos;
+  auto y_diff = ypos - c.old_ypos;
+  c.old_ypos = ypos;
+
+  c.rotate(glm::cross(c.up, c.dir), y_diff * sensitivity);
+  c.rotate(c.up, -x_diff * sensitivity);
+}
 
 constexpr float movespeed = 10.0;
-constexpr float rotationspeed = 15 * 3.6 * (M_PI / 180.0f);
+constexpr float rotationspeed = 15 * 3.6 * (M_PI / 180.0);
 void update_held(WorldState *world, float dt) {
   const float ms = movespeed * dt;
   const float rs = rotationspeed * dt;

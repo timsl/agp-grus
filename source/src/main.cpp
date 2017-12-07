@@ -102,7 +102,7 @@ void keyboard_callback_h(GLFWwindow *win, int key, int, int action, int) {
   keyboard_callback(win, key, action, world);
 }
 void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
-  cursor_callback(win, xpos, ypos);
+  cursor_callback(win, xpos, ypos, world);
 }
 
 int main(int argc, char **argv) {
@@ -135,10 +135,9 @@ int main(int argc, char **argv) {
   glfwSwapInterval(1);
 
   // Capture the input events (e.g., keyboard)
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetKeyCallback(window, keyboard_callback_h);
-  // glfwSetInputMode( ... );
-
-  // Get window resizes
+  glfwSetCursorPosCallback(window, cursor_callback_h);
   glfwSetWindowSizeCallback(window, resize_callback_h);
 
   // Init GLAD to be able to access the OpenGL API
