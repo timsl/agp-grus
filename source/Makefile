@@ -1,6 +1,6 @@
-CPP     := nvcc
-CFLAGS  := -std=c++11 --compiler-options "-Wall -pedantic"
-CPPF    := $(CPP) $(CFLAGS)
+NVCC    := nvcc -std=c++11 --compiler-options "-Wall -pedantic"
+CLANG   := clang++ -std=c++11-Wall -pedantic
+CPPF    := $(NVCC)
 
 BASEDIR := $(PWD)
 LIBDIR  := -L $(BASEDIR)/bin/glad/lib64
