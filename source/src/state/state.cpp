@@ -3,7 +3,7 @@
 void WorldState::update(float dt, float t) {
   auto n = particles.size();
 
-  for (unsigned i = 0; i < n; ++i) {
+  for (size_t i = 0; i < n; ++i) {
     auto &p = particles[i];
 
     p.pos += p.velocity * dt;
