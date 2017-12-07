@@ -11,7 +11,10 @@ void resize_callback(GLFWwindow *win, int width, int height,
 // if anything matches.
 void keyboard_callback(GLFWwindow *win, int key, int action,
                        WorldState *world) {
-  bool key_down = action != GLFW_RELEASE;
+
+  // Keys that act when held down. REPEAT is considered the same as
+  // press since the held thingies should be idempotent anyways.
+  bool key_down = action == GLFW_PRESS || action == GLFW_REPEAT;
   switch (key) {
   case GLFW_KEY_LEFT:
     world->held.turn_left = key_down;
@@ -51,21 +54,29 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
     return;
   }
 
-  // Not handling release just means the code below is a bit neater,
-  // since I'm not using it for any of the current buttons
-  if (action == GLFW_PRESS) {
+  // Keys that aren't held, but just act
+  {
+    bool p = action == GLFW_PRESS;
     switch (key) {
     case GLFW_KEY_ESCAPE:
-      glfwSetWindowShouldClose(win, 1);
+      if (p) {
+        glfwSetWindowShouldClose(win, 1);
+      }
       return;
     case GLFW_KEY_R:
-      world->cam = CameraState();
+      if (p) {
+        world->cam = CameraState();
+      }
       return;
     case GLFW_KEY_P:
-      world->held.simulation_running ^= true;
+      if (p) {
+        world->held.simulation_running ^= true;
+      }
       return;
     case GLFW_KEY_PERIOD:
-      world->update(0.01);
+      if (p) {
+        world->update(0.01);
+      }
       return;
     }
   }
@@ -86,7 +97,7 @@ constexpr double sensitivity = 0.1 * (M_PI / 180.0);
 void cursor_callback(GLFWwindow *win, double xpos, double ypos,
                      WorldState *world) {
   auto &c = world->cam;
-  if (!c.has_seen_mouse){
+  if (!c.has_seen_mouse) {
     c.old_xpos = xpos;
     c.old_ypos = ypos;
     c.has_seen_mouse = true;
@@ -101,7 +112,7 @@ void cursor_callback(GLFWwindow *win, double xpos, double ypos,
   c.rotate(c.up, -x_diff * sensitivity);
 }
 
-constexpr float movespeed = 10.0;
+constexpr float movespeed = 5000.0;
 constexpr float rotationspeed = 15 * 3.6 * (M_PI / 180.0);
 void update_held(WorldState *world, float dt) {
   const float ms = movespeed * dt;
