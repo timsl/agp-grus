@@ -22,14 +22,46 @@ void WorldState::update(float dt, float t) {
         auto force = glm::normalize(p_j.pos - p_i.pos);
 
         if (r < epsilon) {
-            r = epsilon;
+          r = epsilon;
         }
 
         if (D <= r) {
-            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2);
-        } else if (D - D * SDP[(int) p_j.type] <= r && r < D) {
-            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) - 0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) * (std::pow(D, 2) - std::pow(r, 2));
+          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2);
+        } else if (D - D * SDP[(int)p_i.type] <= r && r < D) {
+          force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                   0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                       (std::pow(D, 2) - std::pow(r, 2));
+        } else if (D - D * SDP[(int)p_j.type] <= r &&
+                   r < D - D * SDP[(int)p_i.type]) {
+          float next_r =
+              glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
+          if (next_r < r) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
 
+          } else {
+            force *=
+                G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                0.5f *
+                    (K[(int)p_i.type] * KRP[(int)p_i.type] + K[(int)p_j.type]) *
+                    (std::pow(D, 2) - std::pow(r, 2));
+          }
+        } else if (epsilon <= r && r < D - D * SDP[(int)p_j.type]) {
+          float next_r =
+              glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
+          if (next_r < r) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                     0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) *
+                         (std::pow(D, 2) - std::pow(r, 2));
+
+          } else {
+            force *=
+                G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) -
+                0.5f *
+                    (K[(int)p_i.type] * KRP[(int)p_i.type] + K[(int)p_j.type] * KRP[(int)p_j.type]) *
+                    (std::pow(D, 2) - std::pow(r, 2));
+          }
         }
         p_i.velocity += force;
       }
