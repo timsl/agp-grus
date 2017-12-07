@@ -1,5 +1,5 @@
-CPP     := clang++
-CFLAGS  := -std=c++11 -Wall --pedantic
+CPP     := nvcc
+CFLAGS  := -std=c++11 --compiler-options "-Wall -pedantic"
 CPPF    := $(CPP) $(CFLAGS)
 
 BASEDIR := $(PWD)
@@ -10,7 +10,7 @@ SRCDIRSR:= src/ src/util/ src/sphere/ src/state/ src/input/
 SRCDIRS := $(addprefix $(BASEDIR)/,$(SRCDIRSR))
 INCDIR  := $(addprefix -I,$(SRCDIRS)) -I$(BASEDIR)/glad/include/glad/
 
-LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -pthread
+LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -lpthread
 MKDIR   := mkdir -p
 
 VPATH   := $(BINDIR) $(OBJDIR) $(SRCDIRS)
