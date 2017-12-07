@@ -11,7 +11,7 @@ void WorldState::update(float dt, float t) {
   const float KRP[4] = {0.02, 0.01, 0.02, 0.01};
   const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
 
-  for (unsigned i = 0; i < n; ++i) {
+  for (size_t i = 0; i < n; ++i) {
     auto &p = particles[i];
     for (size_t i = 0; i < n; ++i) {
       auto &p_i = particles[i];
