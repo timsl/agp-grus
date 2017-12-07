@@ -6,7 +6,7 @@
 #include "state.hpp"
 
 void resize_callback(GLFWwindow *win, int width, int height, WorldState *world);
-
+void cursor_callback(GLFWwindow *win, float xpos, float ypos);
 void keyboard_callback(GLFWwindow *win, int key, int action, WorldState *world);
 
 void update_held(WorldState *w, float dt);

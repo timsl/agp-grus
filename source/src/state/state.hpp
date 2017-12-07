@@ -27,10 +27,15 @@ struct Particle {
 };
 
 struct CameraState {
-  float angle;
-  float fov;
+  float fov = 60.0f;
+  double old_xpos = 0, old_ypos = 0;
+  glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  glm::vec3 dir = glm::vec3(0.0f, 0.0f, 1.0f);
+  glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-  CameraState(float angle = 0.0f, float fov = 90.0f) : angle(angle), fov(fov) {}
+  CameraState() {}
+  void move(glm::vec3 dir);
+  void rotate(glm::vec3 axis, float angle);
 };
 
 struct WindowState {
@@ -40,7 +45,6 @@ struct WindowState {
   WindowState() : width(1280), height(720) {}
 };
 
-
 struct WorldState {
   CameraState cam;
   std::vector<Particle> particles;
@@ -49,6 +53,7 @@ struct WorldState {
   std::vector<ParticleProps> particle_props;
 
   void update(float dt, float t);
+
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
                       glm::vec3 planet_1_origin, glm::vec3 planet_2_origin);

@@ -18,9 +18,9 @@ void WorldState::create_planets(std::vector<Particle> &particles,
   int nr_iron = half * procent_iron;
   int nr_silicate = half - nr_iron;
 
-  //auto inital_velocity = glm::vec3(3.2416f, 0.0f, 0.0f); // km/s
+  // auto inital_velocity = glm::vec3(3.2416f, 0.0f, 0.0f); // km/s
   auto inital_velocity = glm::vec3(0.032416f, 0.0f, 0.0f); // km/s
-  float omega = 0.00844638888f;                          // rad s⁻1
+  float omega = 0.00844638888f;                            // rad s⁻1
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
@@ -76,4 +76,13 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
                                     -1.0f * omega * r_xz * std::cos(theta));
     i->velocity += added_velocity;
   }
+}
+
+void CameraState::move(glm::vec3 translation) { pos += translation; }
+void CameraState::rotate(glm::vec3 axis, float angle) {
+  glm::mat4 R = glm::rotate(angle, axis);
+  auto new_dir = glm::vec3(R * glm::vec4(dir, 1.0f));
+  auto new_up = glm::vec3(R * glm::vec4(up, 1.0f));
+  dir = glm::normalize(new_dir);
+  up = glm::normalize(new_up);
 }

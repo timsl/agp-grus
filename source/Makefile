@@ -31,6 +31,7 @@ moon: $(OBJS)
 # additional dependencies
 main.o sphere.o state.o util.o input.o: common.hpp bin/glad/glad.o
 state.o input.o: heldactions.hpp
+main.o: input.hpp input.cpp sphere.cpp sphere.hpp input.cpp input.hpp util.hpp util.cpp
 %.o: %.hpp
 
 setup:

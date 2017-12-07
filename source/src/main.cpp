@@ -1,8 +1,8 @@
 
 #include "common.hpp"
+#include "input.hpp"
 #include "sphere.hpp"
 #include "state.hpp"
-#include "input.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -49,8 +49,8 @@ void init() {
     fprintf(stderr, "Error while getting uniform location");
   }
   world->create_planets(world->particles, 1, 2, 0.3f,
-                       glm::vec3(-3.0f, 0.0f, -5.0f),
-                       glm::vec3(3.0f, 0.0f, -5.0f));
+                        glm::vec3(-3.0f, 0.0f, -5.0f),
+                        glm::vec3(3.0f, 0.0f, -5.0f));
 }
 
 void release() {
@@ -69,19 +69,18 @@ void display(GLFWwindow *window) {
   // This needs to be here since we may revise the model/view/proj while running
   // Could cache it I guess, and only change on demand, but here is ok
 
-  glm::vec3 camPos(0.0f, 0.0f, 2.0f);
-  camPos = glm::rotate(camPos, glm::radians(world->cam.angle),
-                       glm::vec3(0.0f, 1.0f, 0.0f));
-  glm::mat4 view = glm::lookAt(camPos, glm::vec3(0.0f, 0.0f, 0.0f),
-                               glm::vec3(0.0f, 1.0f, 0.0f));
-  glm::mat4 proj = glm::perspective(
-      glm::radians(world->cam.fov), (float)world->window.width / (float)world->window.height, 0.1f, 1000.0f);
+  glm::mat4 V, P;
+  auto ratio = (float)world->window.width / (float)world->window.height;
+  auto &c = world->cam;
+
+  V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
+  P = glm::perspective(glm::radians(c.fov), ratio, 0.1f, 10000.0f);
 
   for (const auto &p : world->particles) {
-    glm::mat4 model;
-    model = glm::translate(model, p.pos);
+    glm::mat4 M;
+    M = glm::translate(M, p.pos);
 
-    glm::mat4 MVP = proj * view * model;
+    glm::mat4 MVP = P * V * M;
     glUniformMatrix4fv(MVP_loc, 1, GL_FALSE, glm::value_ptr(MVP));
 
     // Render a sphere
@@ -96,16 +95,19 @@ void display(GLFWwindow *window) {
   glfwPollEvents();
 }
 
-void resize_callback_h(GLFWwindow *win, int width, int height){
+void resize_callback_h(GLFWwindow *win, int width, int height) {
   resize_callback(win, width, height, world);
 }
-void keyboard_callback_h(GLFWwindow *win, int key, int, int action, int){
+void keyboard_callback_h(GLFWwindow *win, int key, int, int action, int) {
   keyboard_callback(win, key, action, world);
+}
+void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
+  cursor_callback(win, xpos, ypos);
 }
 
 int main(int argc, char **argv) {
   world = new WorldState(DEFAULT_NUM_PARTICLES);
-  
+
   GLFWwindow *window = NULL;
 
   // Initialize GLFW
@@ -120,8 +122,8 @@ int main(int argc, char **argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Open the window and create the context
-  window =
-      glfwCreateWindow(world->window.width, world->window.height, "Applied GPU Programming", NULL, NULL);
+  window = glfwCreateWindow(world->window.width, world->window.height,
+                            "Applied GPU Programming", NULL, NULL);
 
   if (window == NULL) {
     fprintf(stderr, "Could not create window");
@@ -149,11 +151,11 @@ int main(int argc, char **argv) {
 
   // Initialize the 3D view
   init();
-  
+
   // Launch the main loop for rendering
-  float dt = 1.0f;
+  float dt = 0.017;
   float t = 0.0f;
-  world->update(t, t);           // Ensure initialized
+  world->update(t, t); // Ensure initialized
   while (!glfwWindowShouldClose(window)) {
     update_held(world, dt);
     t += dt;
@@ -169,6 +171,6 @@ int main(int argc, char **argv) {
   glfwTerminate();
 
   delete world;
-  
+
   return 0;
 }

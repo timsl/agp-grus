@@ -20,10 +20,10 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
     world->held.turn_right = key_down;
     return;
   case GLFW_KEY_UP:
-    world->held.turn_right = key_down;
+    world->held.turn_up = key_down;
     return;
   case GLFW_KEY_DOWN:
-    world->held.turn_right = key_down;
+    world->held.turn_down = key_down;
     return;
   case GLFW_KEY_W:
     world->held.move_forw = key_down;
@@ -41,10 +41,13 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
     world->held.roll_left = key_down;
     return;
   case GLFW_KEY_E:
-    world->held.move_down = key_down;
+    world->held.roll_right = key_down;
     return;
-  case GLFW_KEY_C:
+  case GLFW_KEY_LEFT_SHIFT:
     world->held.move_up = key_down;
+    return;
+  case GLFW_KEY_LEFT_CONTROL:
+    world->held.move_down = key_down;
     return;
   }
 
@@ -56,8 +59,7 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
       glfwSetWindowShouldClose(win, 1);
       return;
     case GLFW_KEY_R:
-      world->cam.angle = 0.0f;
-      world->cam.fov = 90.0f;
+      world->cam = CameraState();
       return;
     }
   }
@@ -74,12 +76,52 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
   printf("%s unbound key %d.\n", actionname, key);
 }
 
-void update_held(WorldState *w, float dt) {
-  auto &h = w->held;
+void cursor_callback(GLFWwindow *win, float xpos, float ypos) {}
+
+constexpr float movespeed = 10.0;
+constexpr float rotationspeed = 15 * 3.6 * (M_PI / 180.0f);
+void update_held(WorldState *world, float dt) {
+  const float ms = movespeed * dt;
+  const float rs = rotationspeed * dt;
+  auto &h = world->held;
+  auto &c = world->cam;
+
+  if (h.move_forw) {
+    c.move(c.dir * ms);
+  }
+  if (h.move_back) {
+    c.move(-c.dir * ms);
+  }
+  if (h.move_up) {
+    c.move(c.up * ms);
+  }
+  if (h.move_down) {
+    c.move(-c.up * ms);
+  }
+  if (h.move_left) {
+    // These are normalized as the inputs are orthogonal
+    c.move(glm::cross(c.up, c.dir) * ms);
+  }
+  if (h.move_right) {
+    c.move(glm::cross(c.dir, c.up) * ms);
+  }
+
   if (h.turn_left) {
-    w->cam.angle -= 5.0f * dt;
+    c.rotate(c.up, rs);
   }
   if (h.turn_right) {
-    w->cam.angle += 5.0f * dt;
+    c.rotate(c.up, -rs);
+  }
+  if (h.turn_up) {
+    c.rotate(glm::cross(c.dir, c.up), rs);
+  }
+  if (h.turn_down) {
+    c.rotate(glm::cross(c.up, c.dir), rs);
+  }
+  if (h.roll_left) {
+    c.rotate(c.dir, -rs);
+  }
+  if (h.roll_right) {
+    c.rotate(c.dir, rs);
   }
 }
