@@ -10,6 +10,7 @@ void WorldState::update(float dt, float t) {
                        2.9114 * std::pow(10, 11), 7.2785 * std::pow(10, 10)};
   const float KRP[4] = {0.02, 0.01, 0.02, 0.01};
   const float SDP[4] = {0.01, 0.001, 0.01, 0.001};
+  const double G = 6.67408 * std::pow(10, -11);
 
   for (size_t i = 0; i < n; ++i) {
     auto &p_i = particles[i];
@@ -18,6 +19,19 @@ void WorldState::update(float dt, float t) {
       if (j != i) {
         auto &p_j = particles[j];
         float r = glm::distance(p_i.pos, p_j.pos);
+        auto force = glm::normalize(p_j.pos - p_i.pos);
+
+        if (r < epsilon) {
+            r = epsilon;
+        }
+
+        if (D <= r) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2);
+        } else if (D - D * SDP[(int) p_j.type] <= r && r < D) {
+            force *= G * M[(int)p_i.type] * M[(int)p_j.type] * std::pow(r, -2) - 0.5f * (K[(int)p_i.type] + K[(int)p_j.type]) * (std::pow(D, 2) - std::pow(r, 2));
+
+        }
+        p_i.velocity += force;
       }
     }
     p_i.pos += p_i.velocity * dt;
