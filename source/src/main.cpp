@@ -74,7 +74,7 @@ void display(GLFWwindow *window) {
   auto &c = world->cam;
 
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
-  P = glm::perspective(glm::radians(c.fov), ratio, 0.1f, 10000.0f);
+  P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
 
   for (const auto &p : world->particles) {
     glm::mat4 M;
@@ -154,11 +154,12 @@ int main(int argc, char **argv) {
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
-  world->update(t, t); // Ensure initialized
   while (!glfwWindowShouldClose(window)) {
     update_held(world, dt);
     t += dt;
-    world->update(dt, t);
+    if (world->held.simulation_running) {
+      world->update(dt);
+    }
     display(window);
   }
 

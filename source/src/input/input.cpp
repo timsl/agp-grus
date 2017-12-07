@@ -61,6 +61,12 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
     case GLFW_KEY_R:
       world->cam = CameraState();
       return;
+    case GLFW_KEY_P:
+      world->held.simulation_running ^= true;
+      return;
+    case GLFW_KEY_PERIOD:
+      world->update(0.01);
+      return;
     }
   }
 

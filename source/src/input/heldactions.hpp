@@ -21,10 +21,13 @@ struct HeldActions {
   bool roll_right;
   bool roll_left;
 
+  bool simulation_running;
+
   HeldActions()
       : move_right(false), move_left(false), move_up(false), move_down(false),
         move_forw(false), move_back(false), turn_left(false), turn_right(false),
-        turn_up(false), turn_down(false), roll_right(false), roll_left(false){};
+        turn_up(false), turn_down(false), roll_right(false), roll_left(false),
+        simulation_running(false){};
 };
 
 #endif

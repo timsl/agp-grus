@@ -52,7 +52,7 @@ struct WorldState {
   HeldActions held;
   std::vector<ParticleProps> particle_props;
 
-  void update(float dt, float t);
+  void update(float dt);
 
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,

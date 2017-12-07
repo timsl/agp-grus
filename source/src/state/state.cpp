@@ -1,6 +1,6 @@
 #include "state.hpp"
 
-void WorldState::update(float dt, float t) {
+void WorldState::update(float dt) {
   auto n = particles.size();
   const float D = 376.78;
   const float epsilon = 47.0975;
@@ -77,7 +77,7 @@ void WorldState::update(float dt, float t) {
                          (std::pow(D, 2) - std::pow(r, 2));
           }
         }
-        p_i.velocity += force;
+        p_i.velocity += force * dt;
       }
     }
     p_i.pos += p_i.velocity * dt;
