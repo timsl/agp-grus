@@ -6,8 +6,8 @@ void WorldState::update(float dt) {
   const double epsilon = 47.0975f;
   const double M[4] = {1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9),
                        1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9)};
-  const double K[4] = {5.8228 * std::pow(10, 4), 2.29114 * std::pow(10, 3),
-                       5.8228 * std::pow(10, 4), 2.29114 * std::pow(10, 3)};
+  const double K[4] = {5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13),
+                       5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13)};
   const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
   const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
   const double G = 6.67408;
