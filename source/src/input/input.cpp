@@ -86,6 +86,11 @@ constexpr double sensitivity = 0.1 * (M_PI / 180.0);
 void cursor_callback(GLFWwindow *win, double xpos, double ypos,
                      WorldState *world) {
   auto &c = world->cam;
+  if (!c.has_seen_mouse){
+    c.old_xpos = xpos;
+    c.old_ypos = ypos;
+    c.has_seen_mouse = true;
+  }
 
   auto x_diff = xpos - c.old_xpos;
   c.old_xpos = xpos;

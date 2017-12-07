@@ -6,28 +6,24 @@
 
 struct HeldActions {
   // 6 dirs
-  bool move_right;
-  bool move_left;
-  bool move_up;
-  bool move_down;
-  bool move_forw;
-  bool move_back;
+  bool move_right = false;
+  bool move_left = false;
+  bool move_up = false;
+  bool move_down = false;
+  bool move_forw = false;
+  bool move_back = false;
 
   // 6 rotations
-  bool turn_left;
-  bool turn_right;
-  bool turn_up;
-  bool turn_down;
-  bool roll_right;
-  bool roll_left;
+  bool turn_left = false;
+  bool turn_right = false;
+  bool turn_up = false;
+  bool turn_down = false;
+  bool roll_right = false;
+  bool roll_left = false;
 
-  bool simulation_running;
+  bool simulation_running = false;
 
-  HeldActions()
-      : move_right(false), move_left(false), move_up(false), move_down(false),
-        move_forw(false), move_back(false), turn_left(false), turn_right(false),
-        turn_up(false), turn_down(false), roll_right(false), roll_left(false),
-        simulation_running(false){};
+  HeldActions(){}
 };
 
 #endif

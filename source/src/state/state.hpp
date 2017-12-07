@@ -29,6 +29,7 @@ struct Particle {
 struct CameraState {
   float fov = 60.0f;
   double old_xpos = 0, old_ypos = 0;
+  bool has_seen_mouse = false;
   glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 dir = glm::vec3(0.0f, 0.0f, 1.0f);
   glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
