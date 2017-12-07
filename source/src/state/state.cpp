@@ -12,8 +12,11 @@ void WorldState::update(float dt) {
   const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
   const double G = 6.67408;
 
+  std::vector<glm::vec3> velocities(n);
+
   for (size_t i = 0; i < n; ++i) {
     auto &p_i = particles[i];
+    velocities[i] = p_i.velocity;
 
     for (size_t j = 0; j < n; ++j) {
       if (j != i) {
@@ -76,10 +79,15 @@ void WorldState::update(float dt) {
                          (std::pow(D, 2) - std::pow(r, 2));
           }
         }
-        p_i.velocity += dir * (float)(force * dt * std::pow(10, -14));
+        velocities[i] += dir * (float)(force * dt * std::pow(10, -14));
       }
     }
-    p_i.pos += p_i.velocity * dt;
+  }
+  
+  for (size_t i = 0; i < n; ++i) {
+      auto &p = particles[i];
+      p.velocity = velocities[i];
+      p.pos += p.velocity * dt;
   }
 }
 
