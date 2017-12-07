@@ -155,6 +155,7 @@ int main(int argc, char **argv) {
   float t = 0.0f;
   world->update(t, t);           // Ensure initialized
   while (!glfwWindowShouldClose(window)) {
+    update_held(world, dt);
     t += dt;
     world->update(dt, t);
     display(window);
