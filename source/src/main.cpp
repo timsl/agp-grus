@@ -48,9 +48,9 @@ void init() {
   if (MVP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
-  world->create_planets(world->particles, 1, 2, 0.3f,
-                        glm::vec3(-3.0f, 0.0f, -5.0f),
-                        glm::vec3(3.0f, 0.0f, -5.0f));
+  world->create_planets(world->particles, 1800, 6000, 0.3f,
+                        glm::vec3(23925.0f, 0.0f, 9042.7f),
+                        glm::vec3(-23925.0f, 0.0f, -9042.7f));
 }
 
 void release() {
@@ -85,7 +85,7 @@ void display(GLFWwindow *window) {
 
     // Render a sphere
     glUniform4f(color_loc, 0.5, 0.2, 0.0, 0.5);
-    agp::glut::glutSolidSphere(0.5f, 16, 8);
+    agp::glut::glutSolidSphere(188.39f, 16, 8);
     // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
     // agp::glut::glutWireSphere(0.5f, 16, 8);
   }

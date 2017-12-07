@@ -92,9 +92,8 @@ void WorldState::create_planets(std::vector<Particle> &particles,
   int nr_iron = half * procent_iron;
   int nr_silicate = half - nr_iron;
 
-  // auto inital_velocity = glm::vec3(3.2416f, 0.0f, 0.0f); // km/s
-  auto inital_velocity = glm::vec3(0.032416f, 0.0f, 0.0f); // km/s
-  float omega = 0.00844638888f;                            // rad s⁻1
+  auto inital_velocity = glm::vec3(-3.2416f, 0.0f, 0.0f); // km/s
+  float omega = 3.0973f / 360.0f;                            // rad s⁻1
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
@@ -106,11 +105,11 @@ void WorldState::create_planets(std::vector<Particle> &particles,
 
   start += nr_silicate;
   create_sphere(start, start + nr_iron, 0, radius_1, planet_2_origin,
-                -1.0f * inital_velocity, iron_2, omega);
+                -1.0f * inital_velocity, iron_2, -1.0f * omega);
 
   start += nr_iron;
   create_sphere(start, start + nr_silicate, radius_1, radius_2, planet_2_origin,
-                -1.0f * inital_velocity, silicate_2, omega);
+                -1.0f * inital_velocity, silicate_2, -1.0f * omega);
 }
 
 template <typename Iter>
