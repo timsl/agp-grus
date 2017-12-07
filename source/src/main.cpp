@@ -10,13 +10,14 @@ using namespace agp;
 
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
+GLint type_loc = -1;
 GLint MVP_loc = -1;
 GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 200;
+int DEFAULT_NUM_PARTICLES = 600;
 
 WorldState *world;
 
@@ -44,13 +45,32 @@ void init() {
     fprintf(stderr, "Error while getting uniform location");
   }
 
+  type_loc = glGetUniformLocation(shader_program, "uType");
+  if (type_loc == -1) {
+    fprintf(stderr, "Error while getting uniform location");
+  }
+
   MVP_loc = glGetUniformLocation(shader_program, "MVP");
   if (MVP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
+
   world->create_planets(world->particles, 1800, 6000, 0.3f,
                         glm::vec3(23925.0f, 0.0f, 9042.7f),
                         glm::vec3(-23925.0f, 0.0f, -9042.7f));
+
+  // Send colors to opengl
+  {
+    std::vector<GLfloat> colorvec(16);
+    for (int i = 0; i < 4; ++i) {
+      auto &c = world->particle_props[i].color;
+      colorvec[i * 4 + 0] = c.x;
+      colorvec[i * 4 + 1] = c.y;
+      colorvec[i * 4 + 2] = c.z;
+      colorvec[i * 4 + 3] = c.w;
+    }
+    glUniform4fv(color_loc, 4, colorvec.data());
+  }
 }
 
 void release() {
@@ -83,8 +103,8 @@ void display(GLFWwindow *window) {
     glm::mat4 MVP = P * V * M;
     glUniformMatrix4fv(MVP_loc, 1, GL_FALSE, glm::value_ptr(MVP));
 
+    glUniform1i(type_loc, p.type);
     // Render a sphere
-    glUniform4f(color_loc, 0.5, 0.2, 0.0, 0.5);
     agp::glut::glutSolidSphere(188.39f, 16, 8);
     // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
     // agp::glut::glutWireSphere(0.5f, 16, 8);

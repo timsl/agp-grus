@@ -133,6 +133,8 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
     float u = 1.0f - 2.0f * rho_2;
     float sqrt_u2 = std::sqrt(1 - u * u);
 
+    i->type = prop_type;
+    
     i->pos.x = planet_origin.x + Rp_1 * sqrt_u2 * std::cos(2 * M_PI * rho_3);
     i->pos.y = planet_origin.y + Rp_1 * sqrt_u2 * std::sin(2 * M_PI * rho_3);
     i->pos.z = planet_origin.z + Rp_1 * u;
