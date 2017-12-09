@@ -52,6 +52,7 @@ struct WorldState {
   WindowState window;
   HeldActions held;
   std::vector<ParticleProps> particle_props;
+  GLuint vbo;
 
   void update(float dt);
 

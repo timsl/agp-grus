@@ -113,3 +113,25 @@ void util::displayOpenGLInfo() {
   printf("Version: %s\n", glGetString(GL_VERSION));
   printf("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
+
+GLuint util::createEmptyVbo(int nr_floats) {
+  GLuint vbo = 0;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, nr_floats * sizeof(GL_FLOAT), NULL,
+               GL_STREAM_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  return vbo;
+}
+
+void AddInstancedAttribute(GLuint vao, GLuint vbo, int attribute, int dataSize,
+                           int instancedDataLength, int offset) {
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindVertexArray(vao);
+  glVertexAttribPointer(attribute, dataSize, GL_FLOAT, false,
+                        instancedDataLength * sizeof(GL_FLOAT),
+                        (GLvoid *)(offset * sizeof(GL_FLOAT)));
+  glVertexAttribDivisor(attribute, 1);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+}

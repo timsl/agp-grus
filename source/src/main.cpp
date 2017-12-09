@@ -18,6 +18,7 @@ constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
 int DEFAULT_NUM_PARTICLES = 600;
+int INSTANCED_DATA_LENGTH = 17; //4 floats for the 4 coloumns of the model view matrix, 1 float for the color
 
 WorldState *world;
 
@@ -39,6 +40,11 @@ void init() {
   // Init shaders. I let the program be global so I can delete it on exit.
   shader_program = util::loadShaders(VERT_FILE, FRAG_FILE);
   glUseProgram(shader_program);
+
+  // Create the vbo used for the instanced rendering
+  world->vbo = util::createEmptyVbo(INSTANCED_DATA_LENGTH * DEFAULT_NUM_PARTICLES);
+
+
 
   color_loc = glGetUniformLocation(shader_program, "uColor");
   if (color_loc == -1) {
@@ -105,9 +111,10 @@ void display(GLFWwindow *window) {
 
     glUniform1i(type_loc, p.type);
     // Render a sphere
-    agp::glut::glutSolidSphere(188.39f, 16, 8);
+    agp::glut::glutSolidSphereInstanced(188.39f, 16, 8, world->particles);
     // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
     // agp::glut::glutWireSphere(0.5f, 16, 8);
+    break;
   }
 
   // Swap buffers and force a redisplay

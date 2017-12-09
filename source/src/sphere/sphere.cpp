@@ -100,6 +100,158 @@ void generateSphere(GLfloat radius, GLint slices, GLint stacks,
     free(cost2);
 }
 
+void glut::glutSolidSphereInstanced(GLfloat radius, GLint slices, GLint stacks, std::vector<Particle> &particles)
+{
+    GLfloat  *vertices        = NULL;
+    GLfloat  *normals         = NULL;
+    GLushort *stripIdx        = NULL;
+    GLint    nVert            = slices * (stacks - 1) + 2;
+    GLint    nVertIdxsPerPart = (slices + 1) * 2;
+    GLuint   vbo_coords       = 0;
+//    GLuint   vbo_normals      = 0;
+    GLuint   ibo_elements     = 0;
+    GLint    idx              = 0;
+    GLushort offset           = 0;
+    GLsizei  numVertIdxs      = stacks * nVertIdxsPerPart;
+    
+    if (slices == 0 || stacks < 2)
+    {
+        return;
+    }
+    
+    // Allocate vertex and normal buffers
+    vertices = (GLfloat *)malloc(nVert*3*sizeof(GLfloat));
+    normals  = (GLfloat *)malloc(nVert*3*sizeof(GLfloat));
+    
+    // Generate vertices and normals
+    generateSphere(radius, slices, stacks, vertices, normals);
+
+    // Allocate buffers for indices
+    stripIdx = (GLushort *)malloc((slices+1)*2*stacks*sizeof(GLushort));
+    
+    // Generate vertex index arrays for drawing with glDrawElements (all
+    // stacks, including top / bottom, are covered with a triangle strip)
+    {
+        // Top stack
+        for (int j = 0; j < slices; j++, idx += 2)
+        {
+            stripIdx[idx  ] = j+1; // 0 is top vertex, 1 is first for
+            stripIdx[idx+1] = 0;   // first stack
+        }
+        stripIdx[idx  ] = 1; // Repeat first slice's idx for closing off shape
+        stripIdx[idx+1] = 0;
+        idx+=2;
+
+        // Middle stacks (strip indices are relative to first index belonging 
+        // to strip, NOT relative to first vertex/normal pair in array)
+        for (int i = 0; i < stacks-2; i++, idx += 2)
+        {
+            // triangle_strip indices start at 1 (0 is top vertex), and we
+            // advance one stack down as we go along
+            offset = 1+i*slices;
+            for (int j = 0; j < slices; j++, idx += 2)
+            {
+                stripIdx[idx  ] = offset+j+slices;
+                stripIdx[idx+1] = offset+j;
+            }
+            stripIdx[idx  ] = offset+slices; // Repeat first slice's idx
+            stripIdx[idx+1] = offset;          // for closing off shape
+        }
+
+        // Bottom stack (triangle_strip indices start at 1, with 0 top vertex,
+        // and we advance one stack down as we go along)
+        offset = 1+(stacks-2)*slices;
+        for (int j = 0; j < slices; j++, idx += 2)
+        {
+            stripIdx[idx  ] = nVert-1; // Zero-based index, last element in
+            stripIdx[idx+1] = offset+j;  // array (bottom vertex)
+        }
+        stripIdx[idx  ] = nVert-1; // Repeat first slice's idx for closing
+        stripIdx[idx+1] = offset;    // off shape
+    }
+    
+    // Generate the buffer object for the vertices
+    glGenBuffers(1, &vbo_coords);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_coords);
+    glBufferData(GL_ARRAY_BUFFER, nVert * 3 * sizeof(vertices[0]),
+                 vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    // Generate the buffer object for the normals
+//    glGenBuffers(1, &vbo_normals);
+//    glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
+//    glBufferData(GL_ARRAY_BUFFER, nVert * 3 * sizeof(normals[0]),
+//                 normals, GL_STATIC_DRAW);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    // Generate the buffer object for the indices
+    glGenBuffers(1, &ibo_elements);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numVertIdxs * sizeof(stripIdx[0]),
+                 stripIdx, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
+    // Render the sphere
+    {
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_coords);
+        glVertexAttribPointer(
+            0,                  // attribute
+            3,                  // number of elements per vertex, here (x,y,z)
+            GL_FLOAT,           // the type of each element
+            GL_FALSE,           // take our values as-is
+            0,                  // no extra data between each position
+            0                   // offset of first element
+        );
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+//        glEnableVertexAttribArray(attribute_v_normal);
+//        glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
+//        glVertexAttribPointer(
+//            attribute_v_normal, // attribute
+//            3,                  // number of elements per vertex, here (x,y,z)
+//            GL_FLOAT,           // the type of each element
+//            GL_FALSE,           // take our values as-is
+//            0,                  // no extra data between each position
+//            0                   // offset of first element
+//        );
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
+       
+        if (stacks > 1)
+        {
+            const size_t size = sizeof(stripIdx[0]) * nVertIdxsPerPart;
+            
+            for (int i = 0; i < stacks; i++)
+            {
+                glDrawElementsInstanced(GL_TRIANGLE_STRIP, nVertIdxsPerPart,
+                               GL_UNSIGNED_SHORT, (GLvoid*)(size*i), particles.size());
+            }
+        }
+        else
+        {
+            glDrawElements(GL_TRIANGLE_STRIP, nVertIdxsPerPart,
+                           GL_UNSIGNED_SHORT, NULL);
+        }
+        
+        // Clean existing bindings
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        
+        glDisableVertexAttribArray(0);
+//        glDisableVertexAttribArray(attribute_v_normal);
+    }
+    
+    // Release the allocations and buffers
+    free(stripIdx);
+    free(normals);
+    free(vertices);
+    
+    glDeleteBuffers(1, &vbo_coords);
+//        glDeleteBuffers(1, &vbo_normals);
+    glDeleteBuffers(1, &ibo_elements);
+}
+
 void glut::glutSolidSphere(GLfloat radius, GLint slices, GLint stacks)
 {
     GLfloat  *vertices        = NULL;
