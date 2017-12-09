@@ -128,13 +128,13 @@ void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
                                  int dataSize, int instancedDataLength,
                                  int offset) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  // glBindVertexArray(vao);
+  glBindVertexArray(vao);
   glVertexAttribPointer(attribute, dataSize, GL_FLOAT, false,
                         instancedDataLength * sizeof(GL_FLOAT),
                         (GLvoid *)(offset * sizeof(GL_FLOAT)));
   glVertexAttribDivisor(attribute, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  // glBindVertexArray(0);
+  glBindVertexArray(0);
 }
 
 void util::updateVbo(GLuint vbo, float* data, int nr_floats) {
