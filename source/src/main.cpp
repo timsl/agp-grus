@@ -10,8 +10,7 @@ using namespace agp;
 
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
-GLint type_loc = -1;
-GLint MVP_loc = -1;
+GLint P_loc = -1;
 GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
@@ -43,22 +42,21 @@ void init() {
 
   // Create the vbo used for the instanced rendering
   world->vbo = util::createEmptyVbo(INSTANCED_DATA_LENGTH * DEFAULT_NUM_PARTICLES);
-
+  util::addInstancedAttribute(g_default_vao, world->vbo, 1, 4, INSTANCED_DATA_LENGTH, 0); 
+  util::addInstancedAttribute(g_default_vao, world->vbo, 2, 4, INSTANCED_DATA_LENGTH, 4); 
+  util::addInstancedAttribute(g_default_vao, world->vbo, 3, 4, INSTANCED_DATA_LENGTH, 8); 
+  util::addInstancedAttribute(g_default_vao, world->vbo, 4, 4, INSTANCED_DATA_LENGTH, 12); 
+  util::addInstancedAttribute(g_default_vao, world->vbo, 5, 1, INSTANCED_DATA_LENGTH, 16); 
 
 
   color_loc = glGetUniformLocation(shader_program, "uColor");
   if (color_loc == -1) {
-    fprintf(stderr, "Error while getting uniform location");
+    fprintf(stderr, "Error while getting uniform location\n");
   }
 
-  type_loc = glGetUniformLocation(shader_program, "uType");
-  if (type_loc == -1) {
-    fprintf(stderr, "Error while getting uniform location");
-  }
-
-  MVP_loc = glGetUniformLocation(shader_program, "MVP");
-  if (MVP_loc == -1) {
-    fprintf(stderr, "Error while getting uniform location");
+  P_loc = glGetUniformLocation(shader_program, "P");
+  if (P_loc == -1) {
+    fprintf(stderr, "Error while getting uniform location\n");
   }
 
   world->create_planets(world->particles, 1800, 6000, 0.3f,
@@ -102,21 +100,26 @@ void display(GLFWwindow *window) {
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
 
+  glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(P));
+  auto iter = world->particle_vbo_buffer.begin();
+  
   for (const auto &p : world->particles) {
     glm::mat4 M;
     M = glm::translate(M, p.pos);
 
-    glm::mat4 MVP = P * V * M;
-    glUniformMatrix4fv(MVP_loc, 1, GL_FALSE, glm::value_ptr(MVP));
+    glm::mat4 MV = V * M;
 
-    glUniform1i(type_loc, p.type);
+    util::storeModelViewMatrix(MV, iter);
+    (*iter++) = p.type;
     // Render a sphere
-    agp::glut::glutSolidSphereInstanced(188.39f, 16, 8, world->particles);
     // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
     // agp::glut::glutWireSphere(0.5f, 16, 8);
-    break;
   }
 
+  util::updateVbo(world->vbo, &world->particle_vbo_buffer[0], INSTANCED_DATA_LENGTH * DEFAULT_NUM_PARTICLES);
+
+  agp::glut::glutSolidSphereInstanced(188.39f, 16, 8, DEFAULT_NUM_PARTICLES);
+  
   // Swap buffers and force a redisplay
   glfwSwapBuffers(window);
   glfwPollEvents();
@@ -133,7 +136,7 @@ void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
 }
 
 int main(int argc, char **argv) {
-  world = new WorldState(DEFAULT_NUM_PARTICLES);
+  world = new WorldState(DEFAULT_NUM_PARTICLES, INSTANCED_DATA_LENGTH);
 
   GLFWwindow *window = NULL;
 
@@ -144,7 +147,7 @@ int main(int argc, char **argv) {
 
   // Setup the OpenGL context version
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

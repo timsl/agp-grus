@@ -124,14 +124,42 @@ GLuint util::createEmptyVbo(int nr_floats) {
   return vbo;
 }
 
-void AddInstancedAttribute(GLuint vao, GLuint vbo, int attribute, int dataSize,
-                           int instancedDataLength, int offset) {
+void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
+                                 int dataSize, int instancedDataLength,
+                                 int offset) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBindVertexArray(vao);
+  // glBindVertexArray(vao);
   glVertexAttribPointer(attribute, dataSize, GL_FLOAT, false,
                         instancedDataLength * sizeof(GL_FLOAT),
                         (GLvoid *)(offset * sizeof(GL_FLOAT)));
   glVertexAttribDivisor(attribute, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+  // glBindVertexArray(0);
+}
+
+void util::updateVbo(GLuint vbo, float* data, int nr_floats) {
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, nr_floats * sizeof(GL_FLOAT), NULL,
+               GL_STREAM_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, nr_floats * sizeof(GL_FLOAT), data);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator iter) {
+  (*iter++) = MV[0][0];
+  (*iter++) = MV[0][1];
+  (*iter++) = MV[0][2];
+  (*iter++) = MV[0][3];
+  (*iter++) = MV[1][0];
+  (*iter++) = MV[1][1];
+  (*iter++) = MV[1][2];
+  (*iter++) = MV[1][3];
+  (*iter++) = MV[2][0];
+  (*iter++) = MV[2][1];
+  (*iter++) = MV[2][2];
+  (*iter++) = MV[2][3];
+  (*iter++) = MV[3][0];
+  (*iter++) = MV[3][1];
+  (*iter++) = MV[3][2];
+  (*iter++) = MV[3][3];
 }
