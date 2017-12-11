@@ -1,6 +1,6 @@
 #include "kernel.cuh"
 
-__device__ float3 body_body_interaction(CUParticle pi, CUParticle pj){
+__device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   const double D = 376.78;
   const double D2 = pow(D, 2);
   const double epsilon = 47.0975;
@@ -10,11 +10,11 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj){
                        5.8228 * pow(10, 14), 2.29114 * pow(10, 14)};
   const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
   const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
-  const double G = 6.67408;     // * 10^-20, but removed that from M and here
+  const double G = 6.67408; // * 10^-20, but removed that from M and here
 
   // These scales are probably not necessary if we use better numerical techs
-  const double weirdscale1 = pow(10, -24);
-  const double weirdscale2 = pow(10, -17);
+  const double weirdscale1 = pow(10, -16);
+  const double weirdscale2 = pow(10, -22);
 
   const float3 p_i = pi.pos;
   const float3 v_i = pi.velocity;
@@ -25,10 +25,10 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj){
   const char t_j = pj.type;
 
   const auto diff = p_j - p_i;
-  const auto next_diff = ((p_j + v_j*0.00001) - (p_i + v_i*0.00001));
+  const auto next_diff = ((p_j + v_j * 0.00001) - (p_i + v_i * 0.00001));
 
   double r = norm3d(diff.x, diff.y, diff.z);
-  const double next_r = norm3df(next_diff.x, next_diff.y, next_diff.z);
+  const double next_r = norm3d(next_diff.x, next_diff.y, next_diff.z);
 
   const auto dir = diff / r;
   double force = 0.0;
@@ -61,11 +61,10 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj){
     } else {
       force = gmm - dmr * (K[t_i] * KRP[t_i] + K[t_j] * KRP[t_j]);
     }
-   }
+  }
 
   return dir * (float)force;
 }
-
 
 __global__ void calculate_velocities(const CUParticle *particles,
                                      float3 *velocities, size_t n, float dt) {
@@ -114,7 +113,7 @@ void update(WorldState *world, float dt) {
   CUDAERR(cudaMemcpy(d_p, particles, N * sizeof(*d_p), cudaMemcpyHostToDevice));
 
   calculate_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
-                                                                          d_p, d_v, N, dt);
+      d_p, d_v, N, dt);
   apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(d_p, d_v,
                                                                       N, dt);
 
