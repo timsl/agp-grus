@@ -24,7 +24,7 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj){
   const float3 v_j = pj.velocity;
   const char t_j = pj.type;
 
-  const auto diff = p_i - p_j;
+  const auto diff = p_j - p_i;
   const auto next_diff = ((p_j + v_j*0.00001) - (p_i + v_i*0.00001));
 
   double r = norm3d(diff.x, diff.y, diff.z);
@@ -85,7 +85,7 @@ __global__ void calculate_velocities(const CUParticle *particles,
     vel_acc += body_body_interaction(particles[i], particles[j]);
   }
 
-  velocities[i] = particles[i].velocity + vel_acc * dt;
+  velocities[i] = vel_acc * dt;
 }
 
 __global__ void apply_velocities(CUParticle *particles, float3 *velocities,

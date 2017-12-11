@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
     update_held(world, dt);
     t += dt;
     if (world->held.simulation_running) {
-      update(world, 5.8117);
+      update(world, 5.8);
     }
     display(window);
   }

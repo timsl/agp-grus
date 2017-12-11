@@ -75,7 +75,7 @@ void keyboard_callback(GLFWwindow *win, int key, int action,
       return;
     case GLFW_KEY_PERIOD:
       if (p) {
-        update(world, 5.8117);
+        update(world, 5.8);
       }
       return;
     }
