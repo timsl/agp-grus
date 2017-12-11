@@ -1,6 +1,6 @@
 #include "state.hpp"
 
-void WorldState::update(float dt) {
+void update_cpu(std::vector<Particle> &particles, float dt) {
   auto n = particles.size();
   const double D = 376.78f;
   const double epsilon = 47.0975f;

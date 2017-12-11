@@ -63,7 +63,7 @@ void init() {
   {
     std::vector<GLfloat> colorvec(16);
     for (int i = 0; i < 4; ++i) {
-      auto &c = world->particle_props[i].color;
+      auto &c = world->colors[i];
       colorvec[i * 4 + 0] = c.x;
       colorvec[i * 4 + 1] = c.y;
       colorvec[i * 4 + 2] = c.z;
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
     update_held(world, dt);
     t += dt;
     if (world->held.simulation_running) {
-      world->update(dt);
+      update_cpu(world->particles, dt);
     }
     display(window);
   }

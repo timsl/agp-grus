@@ -14,12 +14,6 @@ enum PlanetProperty : char {
   silicate_2 = 3
 };
 
-struct ParticleProps {
-  float inner_radius;
-  float outer_radius;
-  glm::vec4 color;
-};
-
 struct Particle {
   glm::vec3 pos;
   glm::vec3 velocity;
@@ -46,14 +40,16 @@ struct WindowState {
   WindowState() : width(1280), height(720) {}
 };
 
+void update_cpu(std::vector<Particle> &particles, float dt);
+void update_gpu(std::vector<Particle> &particles, float dt);
+
 struct WorldState {
   CameraState cam;
   std::vector<Particle> particles;
   WindowState window;
   HeldActions held;
-  std::vector<ParticleProps> particle_props;
+  std::vector<glm::vec4> colors;
 
-  void update(float dt);
 
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
@@ -62,11 +58,11 @@ struct WorldState {
   void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,
                      char prop_type, float omega);
-  WorldState(int n) : particles(n), particle_props(4) {
-    particle_props[0].color = glm::vec4(0.83137f,0.25098f,0.14510f,0.7f);
-    particle_props[1].color = glm::vec4(0.03922f,0.20784f,0.21176f,0.7f);
-    particle_props[2].color = glm::vec4(0.84706f,0.70588f,0.36471f,0.7f);
-    particle_props[3].color = glm::vec4(0.11765f,0.40392f,0.35294f,0.7f);
+  WorldState(int n) : particles(n), colors(4) {
+    colors[0] = glm::vec4(0.83137f,0.25098f,0.14510f,0.7f);
+    colors[1] = glm::vec4(0.03922f,0.20784f,0.21176f,0.7f);
+    colors[2] = glm::vec4(0.84706f,0.70588f,0.36471f,0.7f);
+    colors[3] = glm::vec4(0.11765f,0.40392f,0.35294f,0.7f);
   }
 };
 
