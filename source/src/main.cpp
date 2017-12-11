@@ -93,26 +93,23 @@ void display(GLFWwindow *window) {
 
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
-
   glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
+  
   auto iter = sphere->particle_vbo_buffer.begin();
 
   sphere->prepare_render(g_default_vao);
   for (const auto &p : world->particles) {
-    glm::mat4 M(1);
-    M = glm::translate(M, p.pos);
-
+    glm::mat4 M = glm::translate(p.pos);
     util::storeModelViewMatrix(M, iter);
     (*iter++) = p.type;
-
-    // Render a sphere
-    // agp::glut::glutSolidSphere(188.39f, 16, 8);
   }
 
   util::updateVbo(sphere->vbo_instanced, &sphere->particle_vbo_buffer[0],
                   sphere->data_length * DEFAULT_NUM_PARTICLES);
+
   sphere->render();
   sphere->finish_render();
+
   // Swap buffers and force a redisplay
   glfwSwapBuffers(window);
   glfwPollEvents();

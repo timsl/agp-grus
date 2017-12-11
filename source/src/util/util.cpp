@@ -132,6 +132,7 @@ void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
   glVertexAttribPointer(attribute, dataSize, GL_FLOAT, false,
                         instancedDataLength * sizeof(GL_FLOAT),
                         (GLvoid *)(offset * sizeof(GL_FLOAT)));
+
   glVertexAttribDivisor(attribute, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);

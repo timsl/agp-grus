@@ -8,6 +8,6 @@ uniform mat4 VP;
 out float c_type;
 
 void main(){
-        gl_Position = VP * M * vec4(pos.x, pos.y, pos.z, 1.0);
-        c_type = type;
+    gl_Position = VP * M * vec4(pos.x, pos.y, pos.z, 1.0);
+    c_type = type;
 }
