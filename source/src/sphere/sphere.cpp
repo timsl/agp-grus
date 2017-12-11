@@ -87,6 +87,7 @@ void Sphere::prepare_render(GLuint vao) {
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);
+  glEnableVertexAttribArray(4);
   glEnableVertexAttribArray(5);
 }
 

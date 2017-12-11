@@ -129,7 +129,7 @@ void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
                                  int offset) {
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer(attribute, dataSize, GL_FLOAT, false,
+  glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE,
                         instancedDataLength * sizeof(GL_FLOAT),
                         (GLvoid *)(offset * sizeof(GL_FLOAT)));
 
@@ -163,6 +163,7 @@ void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter
   (*iter++) = MV[3][1];
   (*iter++) = MV[3][2];
   (*iter++) = MV[3][3];
+  
 }
 
 void util::bindAttrib(GLuint program, int attribute, char* variable_name) {
