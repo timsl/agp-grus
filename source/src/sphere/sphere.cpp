@@ -23,9 +23,8 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   GLfloat *normals = NULL;
   GLushort *stripIdx = NULL;
   GLint nVert = slices * (stacks - 1) + 2;
-  GLint nVertIdxsPerPart = (slices + 1) * 2;
+  this->nVertIdxsPerPart = (slices + 1) * 2;
   //    GLuint   vbo_normals      = 0;
-  GLuint ibo_elements = 0;
   GLint idx = 0;
   GLushort offset = 0;
   GLsizei numVertIdxs = stacks * nVertIdxsPerPart;
@@ -40,7 +39,7 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
 
   // Generate vertices and normals
   generate_sphere(radius, slices, stacks, vertices, normals);
-// Allocate buffers for indices
+  // Allocate buffers for indices
   stripIdx = (GLushort *)malloc((slices + 1) * 2 * stacks * sizeof(GLushort));
 
   // Generate vertex index arrays for drawing with glDrawElements (all
@@ -80,7 +79,6 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
     stripIdx[idx + 1] = offset; // off shape
   }
 
-
   // create vbo for sphere
   glBindVertexArray(vao);
   glGenBuffers(1, &vbo_vertices);
@@ -97,6 +95,12 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
                GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  glGenBuffers(1, &vbo_indices);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, numVertIdxs * sizeof(stripIdx[0]),
+               stripIdx, GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
   glBindVertexArray(0);
 
   nr_vertices = nVert;
@@ -108,12 +112,14 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   util::addInstancedAttribute(vao, vbo_instanced, 3, 4, data_length, 8);
   util::addInstancedAttribute(vao, vbo_instanced, 4, 4, data_length, 12);
   util::addInstancedAttribute(vao, vbo_instanced, 5, 1, data_length, 16);
-  
+
   // bind the attributes to the shader
-  
+
   util::bindAttrib(program, 0, "pos");
   util::bindAttrib(program, 1, "M");
   util::bindAttrib(program, 5, "type");
+
+  this->element_size = sizeof(stripIdx[0]) * nVertIdxsPerPart;
 
   // Release the allocations and buffers
   free(stripIdx);
@@ -132,8 +138,14 @@ void Sphere::prepare_render(GLuint vao) {
 }
 
 void Sphere::render() {
-  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, nr_vertices, nr_spheres);
-  // glDrawArrays(GL_TRIANGLE_STRIP, 0, nr_vertices);
+  // glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, nr_vertices, nr_spheres);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices);
+  for (size_t i = 0; i < stacks; ++i) {
+    glDrawElementsInstanced(GL_TRIANGLE_STRIP, nVertIdxsPerPart,
+                            GL_UNSIGNED_SHORT, (GLvoid *)(element_size * i),
+                            nr_spheres);
+  }
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Sphere::finish_render() {
@@ -148,11 +160,12 @@ void Sphere::finish_render() {
 
 void Sphere::clean_up() {
   glDeleteBuffers(1, &vbo_vertices);
+  glDeleteBuffers(1, &vbo_indices);
   glDeleteBuffers(1, &vbo_instanced);
 }
 
-void setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
-                    const GLboolean halfCircle) {
+void Sphere::setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
+                            const GLboolean halfCircle) {
   // Table size, the sign of n flips the circle direction
   const int size = abs(n);
 

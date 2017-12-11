@@ -6,12 +6,15 @@
 
 struct Sphere {
   GLuint vbo_vertices;
+  GLuint vbo_indices;
   GLuint vbo_instanced;
   GLfloat radius;
   GLuint slices;
   GLuint stacks;
   GLint nr_vertices;
   GLint nr_spheres;
+  GLint nVertIdxsPerPart;
+  size_t element_size;
   std::vector<float> particle_vbo_buffer;
   unsigned data_length;
 
@@ -22,6 +25,8 @@ struct Sphere {
   void prepare_render(GLuint vao);
   void render();
   void finish_render();
+  void setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
+                      const GLboolean halfCircle); 
   void clean_up();
 };
 
