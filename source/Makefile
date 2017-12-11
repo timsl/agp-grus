@@ -3,7 +3,7 @@
 # https://stackoverflow.com/questions/31000996/style-of-line-directive-is-a-gcc-extension
 
 
-NVCC    := nvcc -arch=sm_52 -std=c++11
+NVCC    := nvcc -arch=sm_52 -std=c++11 -O2
 NCFLAGS := --compiler-options "-Wall -pedantic"
 CLANG   := clang++ -std=c++11-Wall -pedantic
 CPPF    := $(NVCC)
