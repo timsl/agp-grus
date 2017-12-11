@@ -1,6 +1,6 @@
 #include "kernel.cuh"
 
-__global__ void calculate_velocities(CUParticle *particles, float3 *velocities,
+__global__ void calculate_velocities(const CUParticle *particles, float3 *velocities,
                                      size_t n, float dt) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n)
@@ -8,6 +8,7 @@ __global__ void calculate_velocities(CUParticle *particles, float3 *velocities,
   velocities[i] = make_float3(0.0, 0.0, 0.0);
 
   const double D = 376.78f;
+  const double D2 = std::pow(D, 2);
   const double epsilon = 47.0975f;
   const double M[4] = {1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9),
                        1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9)};
@@ -17,19 +18,50 @@ __global__ void calculate_velocities(CUParticle *particles, float3 *velocities,
   const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
   const double G = 6.67408;
 
-  const auto p_i = particles[i];
+  const float3 p_i = particles[i].pos;
+  const float3 v_i = particles[i].velocity;
+  const char t_i = particles[i].type;
+
+  float3 my_new_velocity = make_float3(0.0, 0.0, 0.0);
 
   for (size_t j = 0; j < n; ++j) {
     if (j == i) {
       continue;
     }
 
-    const auto p_j = particles[j];
-    const auto diff = p_i.pos - p_j.pos;
-    const float r = norm3df(diff.x, diff.y, diff.z);
+    const float3 p_j = particles[j].pos;
+    const float3 v_j = particles[j].velocity;
+    const char t_j = particles[j].type;
+
+    const auto diff = p_j - p_i;
+    const auto next_diff = ((p_j + v_j) - (p_i + v_i));
+
+    double r = norm3df(diff.x, diff.y, diff.z);
+    const double next_r = norm3df(next_diff.x, next_diff.y, next_diff.z);
+
     const auto dir = diff / r;
-    double force;
+    double force = 0.0;
+
+    // pre-computed values
+    r = max(r, epsilon);
+    const double r2 = std::pow(r, 2);
+    const double gmm = G * M[t_i] * M[t_j] * std::pow(r, -2);
+    const double dmr = (D2 - r2) * 0.5;
+
+    if (r >= D) {
+      // Not in contact
+      force = gmm;
+    } else if (r >= D - D * SDP[t_i]) {
+      // In contact, but no shell penetrated
+      force = gmm - dmr * (K[t_i] + K[t_j]);
+    } else if (r >= D - D * SDP[t_j]){
+
+    }
+
+    my_new_velocity += dir * (float)(force * dt * std::pow(10, -14));
   }
+
+  velocities[i] = my_new_velocity;
 }
 
 __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
@@ -38,8 +70,8 @@ __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
   if (i >= n)
     return;
 
-  const auto vel = particles[i].velocity + velocities[i];
-  particles[i].pos += vel;
+  particles[i].velocity += velocities[i];
+  particles[i].pos += particles[i].velocity;
 }
 
 void update(WorldState *world, float dt) {
