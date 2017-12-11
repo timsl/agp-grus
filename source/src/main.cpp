@@ -10,8 +10,7 @@ using namespace agp;
 
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
-GLint type_loc = -1;
-GLint P_loc = -1;
+GLint VP_loc = -1;
 GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
@@ -47,12 +46,8 @@ void init() {
   if (color_loc == -1) {
     fprintf(stderr, "Error while getting uniform location\n");
   }
-  type_loc = glGetUniformLocation(shader_program, "uType");
-  if (type_loc == -1) {
-    fprintf(stderr, "Error while getting uniform location");
-  }
-  P_loc = glGetUniformLocation(shader_program, "P");
-  if (P_loc == -1) {
+  VP_loc = glGetUniformLocation(shader_program, "VP");
+  if (VP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location\n");
   }
 
@@ -72,7 +67,7 @@ void init() {
     }
     glUniform4fv(color_loc, 4, colorvec.data());
   }
-  sphere = new Sphere(188.39f, 16, 8, 1, g_default_vao, DEFAULT_NUM_PARTICLES);
+  sphere = new Sphere(188.39f, 16, 8, 1, g_default_vao, DEFAULT_NUM_PARTICLES, shader_program);
 }
 
 void release() {
@@ -96,50 +91,20 @@ void display(GLFWwindow *window) {
   auto ratio = (float)world->window.width / (float)world->window.height;
   auto &c = world->cam;
 
-  /*V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
-  P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
-
-  glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(P));
-  auto iter = world->particle_vbo_buffer.begin();
-  
-  for (const auto &p : world->particles) {
-    glm::mat4 M;
-    M = glm::translate(M, p.pos);
-
-    glm::mat4 MV = V * M;
-
-    util::storeModelViewMatrix(MV, iter);
-    (*iter++) = p.type;
-    // Render a sphere
-    // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
-    // agp::glut::glutWireSphere(0.5f, 16, 8);
-    glBindVertexArray(g_default_vao);
-    glEnableVertexAttribArray(0);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 16* (8 - 1) + 2);
-    glDisableVertexAttribArray(0);
-    glBindVertexArray(0);
-  }
-
-  util::updateVbo(world->vbo, &world->particle_vbo_buffer[0],
-  INSTANCED_DATA_LENGTH * DEFAULT_NUM_PARTICLES);
-*/
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
 
-  glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(P));
+  glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
   auto iter = sphere->particle_vbo_buffer.begin();
 
   sphere->prepare_render(g_default_vao);
   for (const auto &p : world->particles) {
-    glm::mat4 M;
+    glm::mat4 M(1);
     M = glm::translate(M, p.pos);
 
-    glm::mat4 MV = P * V * M;
-
-    util::storeModelViewMatrix(MV, iter);
+    util::storeModelViewMatrix(M, iter);
     (*iter++) = p.type;
 
-    glUniform1i(type_loc, p.type);
     // Render a sphere
     // agp::glut::glutSolidSphere(188.39f, 16, 8);
   }

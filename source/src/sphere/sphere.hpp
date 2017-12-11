@@ -13,10 +13,10 @@ struct Sphere {
   GLint nr_vertices;
   GLint nr_spheres;
   std::vector<float> particle_vbo_buffer;
-  int data_length;
+  unsigned data_length;
 
   Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
-         GLint n_particles);
+         GLint n_particles, GLuint program);
   void generate_sphere(GLfloat radius, GLint slcies, GLint stacks,
                        GLfloat *verticies, GLfloat *normals);
   void prepare_render(GLuint vao);

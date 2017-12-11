@@ -6,7 +6,7 @@ using namespace std;
 using namespace agp;
 
 Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
-               GLint n_particles) {
+               GLint n_particles, GLuint program) {
 
   this->radius = radius;
   this->slices = slices;
@@ -68,6 +68,13 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   util::addInstancedAttribute(vao, vbo_instanced, 3, 4, data_length, 8);
   util::addInstancedAttribute(vao, vbo_instanced, 4, 4, data_length, 12);
   util::addInstancedAttribute(vao, vbo_instanced, 5, 1, data_length, 16);
+  
+  // bind the attributes to the shader
+  
+  util::bindAttrib(program, 0, "pos");
+  util::bindAttrib(program, 1, "M");
+  util::bindAttrib(program, 5, "type");
+
   // Release the allocations and buffers
   free(stripIdx);
   free(normals);

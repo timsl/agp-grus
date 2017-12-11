@@ -1,8 +1,13 @@
 #version 330 core
 layout(location = 0) in vec3 pos;
-layout(location = 1) in mat4 mv;
-uniform mat4 P;
+layout(location = 1) in mat4 M;
+layout(location = 5) in float type;
+
+uniform mat4 VP;
+
+out float c_type;
 
 void main(){
-        gl_Position = mv * vec4(pos.x, pos.y, pos.z, 1.0);
+        gl_Position = VP * M * vec4(pos.x, pos.y, pos.z, 1.0);
+        c_type = type;
 }
