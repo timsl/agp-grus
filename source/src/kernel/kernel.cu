@@ -1,7 +1,7 @@
 #include "kernel.cuh"
 
-__global__ void calculate_velocities(const CUParticle *particles, float3 *velocities,
-                                     size_t n, float dt) {
+__global__ void calculate_velocities(const CUParticle *particles,
+                                     float3 *velocities, size_t n, float dt) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n)
     return;
@@ -12,16 +12,22 @@ __global__ void calculate_velocities(const CUParticle *particles, float3 *veloci
   const double epsilon = 47.0975f;
   const double M[4] = {1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9),
                        1.9549 * std::pow(10, 10), 7.4161 * std::pow(10, 9)};
-  const double K[4] = {5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13),
-                       5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 13)};
+  const double K[4] = {5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 14),
+                       5.8228 * std::pow(10, 14), 2.29114 * std::pow(10, 14)};
   const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
   const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
   const double G = 6.67408;
+
+  // These scales are probably not necessary if we use better numerical techs
+  const double weirdscale1 = std::pow(10, -17);
+  const double weirdscale2 = std::pow(10, -8);
 
   const float3 p_i = particles[i].pos;
   const float3 v_i = particles[i].velocity;
   const char t_i = particles[i].type;
 
+  // Want a local velocity to write to in each loop to save some global
+  // bandwidth
   float3 my_new_velocity = make_float3(0.0, 0.0, 0.0);
 
   for (size_t j = 0; j < n; ++j) {
@@ -34,7 +40,7 @@ __global__ void calculate_velocities(const CUParticle *particles, float3 *veloci
     const char t_j = particles[j].type;
 
     const auto diff = p_j - p_i;
-    const auto next_diff = ((p_j + v_j) - (p_i + v_i));
+    const auto next_diff = ((p_j + v_j * dt) - (p_i + v_i * dt));
 
     double r = norm3df(diff.x, diff.y, diff.z);
     const double next_r = norm3df(next_diff.x, next_diff.y, next_diff.z);
@@ -46,19 +52,33 @@ __global__ void calculate_velocities(const CUParticle *particles, float3 *veloci
     r = max(r, epsilon);
     const double r2 = std::pow(r, 2);
     const double gmm = G * M[t_i] * M[t_j] * std::pow(r, -2);
-    const double dmr = (D2 - r2) * 0.5;
+    const double dmr = (D2 - r2) * 0.5 * weirdscale2;
+    const double oneshell = min(SDP[t_i], SDP[t_j]);
+    const double twoshell = max(SDP[t_i], SDP[t_j]);
 
     if (r >= D) {
       // Not in contact
       force = gmm;
-    } else if (r >= D - D * SDP[t_i]) {
+    } else if (r >= D - D * oneshell) {
       // In contact, but no shell penetrated
       force = gmm - dmr * (K[t_i] + K[t_j]);
-    } else if (r >= D - D * SDP[t_j]){
-
+    } else if (r >= D - D * twoshell) {
+      // One shell has been penetrated
+      if (next_r < r) {
+        force = gmm - dmr * (K[t_i] + K[t_j]);
+      } else {
+        force = gmm - dmr * (K[t_i] * KRP[t_i] + K[t_j]);
+      }
+    } else {
+      // Both shells penetrated (r > epsilon)
+      if (next_r < r) {
+        force = gmm - dmr * (K[t_i] + K[t_j]);
+      } else {
+        force = gmm - dmr * (K[t_i] * KRP[t_i] + K[t_j] * KRP[t_j]);
+      }
     }
 
-    my_new_velocity += dir * (float)(force * dt * std::pow(10, -14));
+    my_new_velocity += dir * (float)(force * dt * weirdscale1);
   }
 
   velocities[i] = my_new_velocity;

@@ -62,6 +62,4 @@ struct WorldState {
   }
 };
 
-void update_cpu(std::vector<Particle> &particles, float dt);
-
 #endif

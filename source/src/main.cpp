@@ -17,7 +17,7 @@ GLuint shader_program;
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 600;
+int DEFAULT_NUM_PARTICLES = 1000;
 
 WorldState *world;
 
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
     update_held(world, dt);
     t += dt;
     if (world->held.simulation_running) {
-      update(world, dt);
+      update(world, 5.8117);
     }
     display(window);
   }
