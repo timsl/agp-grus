@@ -163,7 +163,6 @@ void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter
   (*iter++) = MV[3][1];
   (*iter++) = MV[3][2];
   (*iter++) = MV[3][3];
-  
 }
 
 void util::bindAttrib(GLuint program, int attribute, char* variable_name) {
