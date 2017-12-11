@@ -40,25 +40,25 @@ void update_cpu(std::vector<Particle> &particles, float dt) {
         // Element are in contact but no shell is penetrated
         else if (D - D * SDP[pi_t] <= r && r < D) {
           force =
-              G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
-              0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
+            G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+            0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
         }
         // One shell has been penetrated
         else if (D - D * SDP[pj_t] <= r && r < D - D * SDP[pi_t]) {
           float next_r =
-              glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
+            glm::distance(p_i.pos + p_i.velocity, p_j.pos + p_j.velocity);
           // Seperation is decreasing
           if (next_r < r) {
             force =
-                G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
-                0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
+              G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
+              0.5f * (K[pi_t] + K[pj_t]) * (std::pow(D, 2) - std::pow(r, 2));
 
           }
           // Seperation is increasing
           else {
             force = G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
-                     0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t]) *
-                         (std::pow(D, 2) - std::pow(r, 2));
+                    0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t]) *
+              (std::pow(D, 2) - std::pow(r, 2));
           }
         }
         // Both shells have been penetrated
@@ -75,19 +75,19 @@ void update_cpu(std::vector<Particle> &particles, float dt) {
           // Seperation is increasing
           else {
             force = G * M[pi_t] * M[pj_t] * std::pow(r, -2) -
-                     0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t] * KRP[pj_t]) *
-                         (std::pow(D, 2) - std::pow(r, 2));
+                    0.5f * (K[pi_t] * KRP[pi_t] + K[pj_t] * KRP[pj_t]) *
+                        (std::pow(D, 2) - std::pow(r, 2));
           }
         }
         velocities[i] += dir * (float)(force * dt * std::pow(10, -14));
       }
     }
   }
-  
+
   for (size_t i = 0; i < n; ++i) {
-      auto &p = particles[i];
-      p.velocity = velocities[i];
-      p.pos += p.velocity * dt;
+    auto &p = particles[i];
+    p.velocity = velocities[i];
+    p.pos += p.velocity * dt;
   }
 }
 
@@ -142,7 +142,7 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
     float sqrt_u2 = std::sqrt(1 - u * u);
 
     i->type = prop_type;
-    
+
     i->pos.x = planet_origin.x + Rp_1 * sqrt_u2 * std::cos(2 * M_PI * rho_3);
     i->pos.y = planet_origin.y + Rp_1 * sqrt_u2 * std::sin(2 * M_PI * rho_3);
     i->pos.z = planet_origin.z + Rp_1 * u;

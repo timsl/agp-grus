@@ -40,16 +40,12 @@ struct WindowState {
   WindowState() : width(1280), height(720) {}
 };
 
-void update_cpu(std::vector<Particle> &particles, float dt);
-void update_gpu(std::vector<Particle> &particles, float dt);
-
 struct WorldState {
   CameraState cam;
   std::vector<Particle> particles;
   WindowState window;
   HeldActions held;
   std::vector<glm::vec4> colors;
-
 
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
@@ -59,11 +55,13 @@ struct WorldState {
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,
                      char prop_type, float omega);
   WorldState(int n) : particles(n), colors(4) {
-    colors[0] = glm::vec4(0.83137f,0.25098f,0.14510f,0.7f);
-    colors[1] = glm::vec4(0.03922f,0.20784f,0.21176f,0.7f);
-    colors[2] = glm::vec4(0.84706f,0.70588f,0.36471f,0.7f);
-    colors[3] = glm::vec4(0.11765f,0.40392f,0.35294f,0.7f);
+    colors[0] = glm::vec4(0.83137f, 0.25098f, 0.14510f, 0.7f);
+    colors[1] = glm::vec4(0.03922f, 0.20784f, 0.21176f, 0.7f);
+    colors[2] = glm::vec4(0.84706f, 0.70588f, 0.36471f, 0.7f);
+    colors[3] = glm::vec4(0.11765f, 0.40392f, 0.35294f, 0.7f);
   }
 };
+
+void update_cpu(std::vector<Particle> &particles, float dt);
 
 #endif

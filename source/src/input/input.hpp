@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "heldactions.hpp"
 #include "state.hpp"
+#include "kernel.cuh"
 
 void resize_callback(GLFWwindow *win, int width, int height, WorldState *world);
 void cursor_callback(GLFWwindow *win, double xpos, double ypos,

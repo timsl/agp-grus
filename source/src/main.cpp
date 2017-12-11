@@ -1,6 +1,6 @@
-
 #include "common.hpp"
 #include "input.hpp"
+#include "kernel.cuh"
 #include "sphere.hpp"
 #include "state.hpp"
 #include "util.hpp"
@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
     update_held(world, dt);
     t += dt;
     if (world->held.simulation_running) {
-      update_cpu(world->particles, dt);
+      update(world, dt);
     }
     display(window);
   }

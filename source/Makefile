@@ -1,21 +1,29 @@
-NVCC    := nvcc -std=c++11 --compiler-options "-Wall -pedantic"
+# https://devblogs.nvidia.com/parallelforall/separate-compilation-linking-cuda-device-code/
+# -x cu and -dc are relevant stuff, but compiling .cpp as -x cu means we have to skip -pedantic due to
+# https://stackoverflow.com/questions/31000996/style-of-line-directive-is-a-gcc-extension
+
+
+NVCC    := nvcc -arch=sm_52 -std=c++11
+NCFLAGS := --compiler-options "-Wall -pedantic"
 CLANG   := clang++ -std=c++11-Wall -pedantic
 CPPF    := $(NVCC)
+
+CUDASAMPLESLOC := /opt/cuda/samples/common/inc
 
 BASEDIR := $(PWD)
 LIBDIR  := -L $(BASEDIR)/bin/glad/lib64
 BINDIR  := $(BASEDIR)/bin
 OBJDIR  := $(BINDIR)/obj
-SRCDIRSR:= src/ src/util/ src/sphere/ src/state/ src/input/
+SRCDIRSR:= src/ src/util/ src/sphere/ src/state/ src/input/ src/kernel/
 SRCDIRS := $(addprefix $(BASEDIR)/,$(SRCDIRSR))
-INCDIR  := $(addprefix -I,$(SRCDIRS)) -I$(BASEDIR)/glad/include/glad/
+INCDIR  := $(addprefix -I,$(SRCDIRS)) -I$(BASEDIR)/glad/include/glad/ -I$(CUDASAMPLESLOC)
 
 LIBS    := -lglad -lglfw -lGL -lEGL -lXrandr -lXext -lX11 -lrt -ldl -lpthread
 MKDIR   := mkdir -p
 
 VPATH   := $(BINDIR) $(OBJDIR) $(SRCDIRS)
 SRCS    := $(wildcard $(BASEDIR)/src/**/*.cpp $(BASEDIR)/src/*.cpp)
-OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o
+OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o kernel.o
 
 all: setup moon
 
@@ -26,12 +34,17 @@ moon: $(OBJS)
 	$(CPPF) $(INCDIR) $(LIBDIR) $(OBJDIR)/*.o -o $(BINDIR)/moon $(LIBS)
 
 %.o: %.cpp
-	$(CPPF) $(INCDIR) -c $< -o $(OBJDIR)/$@
+	$(CPPF) $(INCDIR) $(NCFLAGS) -c $< -o $(OBJDIR)/$@
+
+%.o: %.cu
+	$(CPPF) $(INCDIR) -dc $< -o $(OBJDIR)/$@
 
 # additional dependencies
 main.o sphere.o state.o util.o input.o: common.hpp bin/glad/glad.o
 state.o input.o: heldactions.hpp
 main.o: input.hpp input.cpp sphere.cpp sphere.hpp input.cpp input.hpp util.hpp util.cpp state.cpp state.hpp
+kernel.cubin: state.hpp state.cpp
+main.o input.o: kernel.cu kernel.cuh
 %.o: %.hpp
 
 setup:
@@ -47,3 +60,4 @@ rebuild: clean all
 
 ec: 
 	@echo $(INCDIR)
+	@echo $(OBJS)
