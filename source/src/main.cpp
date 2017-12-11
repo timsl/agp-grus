@@ -76,6 +76,7 @@ void init() {
 }
 
 void release() {
+  sphere->clean_up();
   // Release the default VAO
   glDeleteVertexArrays(1, &g_default_vao);
 
@@ -100,7 +101,7 @@ void display(GLFWwindow *window) {
 
   glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(P));
   auto iter = world->particle_vbo_buffer.begin();
-  
+  
   for (const auto &p : world->particles) {
     glm::mat4 M;
     M = glm::translate(M, p.pos);
@@ -125,18 +126,28 @@ void display(GLFWwindow *window) {
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
 
+  glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(P));
+  auto iter = sphere->particle_vbo_buffer.begin();
+
+  sphere->prepare_render(g_default_vao);
   for (const auto &p : world->particles) {
     glm::mat4 M;
     M = glm::translate(M, p.pos);
 
-    glm::mat4 MVP = P * V * M;
-    glUniformMatrix4fv(P_loc, 1, GL_FALSE, glm::value_ptr(MVP));
+    glm::mat4 MV = P * V * M;
+
+    util::storeModelViewMatrix(MV, iter);
+    (*iter++) = p.type;
 
     glUniform1i(type_loc, p.type);
     // Render a sphere
-    sphere->render(g_default_vao);
-    //agp::glut::glutSolidSphere(188.39f, 16, 8);
+    // agp::glut::glutSolidSphere(188.39f, 16, 8);
   }
+
+  util::updateVbo(sphere->vbo_instanced, &sphere->particle_vbo_buffer[0],
+                  sphere->data_length * DEFAULT_NUM_PARTICLES);
+  sphere->render();
+  sphere->finish_render();
   // Swap buffers and force a redisplay
   glfwSwapBuffers(window);
   glfwPollEvents();

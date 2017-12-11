@@ -5,8 +5,19 @@
 using namespace std;
 using namespace agp;
 
-Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao, int n_particles)
-    : radius(radius), slices(slices), stacks(stacks), particle_vbo_buffer(n), data_length(17) {
+Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
+               GLint n_particles) {
+
+  this->radius = radius;
+  this->slices = slices;
+  this->stacks = stacks;
+  this->nr_spheres = n_particles;
+  this->data_length = 17;
+  this->particle_vbo_buffer.reserve(nr_spheres * data_length);
+
+  for (size_t i = 0; i < nr_spheres * data_length; ++i) {
+    particle_vbo_buffer.push_back(0.0f);
+  }
 
   GLfloat *vertices = NULL;
   GLfloat *normals = NULL;
@@ -50,29 +61,46 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao, in
 
   nr_vertices = nVert;
   // Create the vbo used for the instanced rendering
-  vbo_instanced =
-      util::createEmptyVbo(data_length * n_particles);
-  
-  util::addInstancedAttribute(vao, vbo_instanced, 1, 4,
-                              data_length, 0);
-  util::addInstancedAttribute(vao, vbo_instanced, 2, 4,
-                              data_length, 4);
-  util::addInstancedAttribute(vao, vbo_instanced, 3, 4,
-                              data_length, 8);
-  util::addInstancedAttribute(vao, vbo_instanced, 4, 4,
-                              data_length, 12);
-  util::addInstancedAttribute(vao, vbo_instanced, 5, 1,
-                              data_length, 16);
+  vbo_instanced = util::createEmptyVbo(nr_spheres * data_length);
+
+  util::addInstancedAttribute(vao, vbo_instanced, 1, 4, data_length, 0);
+  util::addInstancedAttribute(vao, vbo_instanced, 2, 4, data_length, 4);
+  util::addInstancedAttribute(vao, vbo_instanced, 3, 4, data_length, 8);
+  util::addInstancedAttribute(vao, vbo_instanced, 4, 4, data_length, 12);
+  util::addInstancedAttribute(vao, vbo_instanced, 5, 1, data_length, 16);
+  // Release the allocations and buffers
+  free(stripIdx);
+  free(normals);
+  free(vertices);
 }
 
-void Sphere::render(GLuint vao) {
+void Sphere::prepare_render(GLuint vao) {
   glBindVertexArray(vao);
   glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
+  glEnableVertexAttribArray(5);
+}
 
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, nr_vertices);
+void Sphere::render() {
+  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, nr_vertices, nr_spheres);
+  // glDrawArrays(GL_TRIANGLE_STRIP, 0, nr_vertices);
+}
 
+void Sphere::finish_render() {
+  glDisableVertexAttribArray(5);
+  glDisableVertexAttribArray(4);
+  glDisableVertexAttribArray(3);
+  glDisableVertexAttribArray(2);
+  glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
   glBindVertexArray(0);
+}
+
+void Sphere::clean_up() {
+  glDeleteBuffers(1, &vbo_vertices);
+  glDeleteBuffers(1, &vbo_instanced);
 }
 
 void setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
