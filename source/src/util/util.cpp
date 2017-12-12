@@ -146,23 +146,10 @@ void util::updateVbo(GLuint vbo, float* data, int nr_floats) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter) {
-  (*iter++) = MV[0][0];
-  (*iter++) = MV[0][1];
-  (*iter++) = MV[0][2];
-  (*iter++) = MV[0][3];
-  (*iter++) = MV[1][0];
-  (*iter++) = MV[1][1];
-  (*iter++) = MV[1][2];
-  (*iter++) = MV[1][3];
-  (*iter++) = MV[2][0];
-  (*iter++) = MV[2][1];
-  (*iter++) = MV[2][2];
-  (*iter++) = MV[2][3];
-  (*iter++) = MV[3][0];
-  (*iter++) = MV[3][1];
-  (*iter++) = MV[3][2];
-  (*iter++) = MV[3][3];
+void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter) { 
+  auto *ptr = glm::value_ptr(MV[3]);
+  std::copy(ptr, ptr+4, iter);
+  iter += 4;
 }
 
 void util::bindAttrib(GLuint program, int attribute, char* variable_name) {

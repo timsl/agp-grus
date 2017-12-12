@@ -16,9 +16,7 @@ GLuint shader_program;
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 600;
-int INSTANCED_DATA_LENGTH = 17; // 4 floats for the 4 coloumns of the model view
-                                // matrix, 1 float for the color
+int DEFAULT_NUM_PARTICLES = 10000;
 
 WorldState *world;
 Sphere *sphere;
@@ -135,8 +133,8 @@ int main(int argc, char **argv) {
   }
 
   // Setup the OpenGL context version
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

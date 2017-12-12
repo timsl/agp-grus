@@ -12,7 +12,7 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   this->slices = slices;
   this->stacks = stacks;
   this->nr_spheres = n_particles;
-  this->data_length = 17;
+  this->data_length = 5;
   this->particle_vbo_buffer.reserve(nr_spheres * data_length);
 
   for (size_t i = 0; i < nr_spheres * data_length; ++i) {
@@ -108,16 +108,13 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   vbo_instanced = util::createEmptyVbo(nr_spheres * data_length);
 
   util::addInstancedAttribute(vao, vbo_instanced, 1, 4, data_length, 0);
-  util::addInstancedAttribute(vao, vbo_instanced, 2, 4, data_length, 4);
-  util::addInstancedAttribute(vao, vbo_instanced, 3, 4, data_length, 8);
-  util::addInstancedAttribute(vao, vbo_instanced, 4, 4, data_length, 12);
-  util::addInstancedAttribute(vao, vbo_instanced, 5, 1, data_length, 16);
+  util::addInstancedAttribute(vao, vbo_instanced, 2, 1, data_length, 4);
 
   // bind the attributes to the shader
 
   util::bindAttrib(program, 0, "pos");
   util::bindAttrib(program, 1, "M");
-  util::bindAttrib(program, 5, "type");
+  util::bindAttrib(program, 2, "type");
 
   this->element_size = sizeof(stripIdx[0]) * nVertIdxsPerPart;
 
@@ -132,9 +129,6 @@ void Sphere::prepare_render(GLuint vao) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
-  glEnableVertexAttribArray(3);
-  glEnableVertexAttribArray(4);
-  glEnableVertexAttribArray(5);
 }
 
 void Sphere::render() {
@@ -149,9 +143,6 @@ void Sphere::render() {
 }
 
 void Sphere::finish_render() {
-  glDisableVertexAttribArray(5);
-  glDisableVertexAttribArray(4);
-  glDisableVertexAttribArray(3);
   glDisableVertexAttribArray(2);
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
