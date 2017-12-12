@@ -24,14 +24,17 @@ GLuint createEmptyVbo(int nr_floats);
  * Helper method that adds an instanced attribute to a vao
  */
 void addInstancedAttribute(GLuint vao, GLuint vbo, int attribute, int dataSize,
-                           int instancedDataLength, int offset);
+                           GLsizei stride, size_t offset, bool integral);
 
 /**
  * Helper method to update our vbo for instanced rendering
  */
-void updateVbo(GLuint vbo, float* data, int nr_floats);
+void updateVbo(GLuint vbo, void *data, int nr);
 
-void storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter);
+void storeModelViewMatrix(glm::mat4 MV, void *to_ptr);
+void storeByte(char b, void *to_ptr);
+
+
 void bindAttrib(GLuint program, int attribute, char* variable_name);
 } // namespace util
 } // namespace agp

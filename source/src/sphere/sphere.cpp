@@ -12,12 +12,9 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   this->slices = slices;
   this->stacks = stacks;
   this->nr_spheres = n_particles;
-  this->data_length = 5;
-  this->particle_vbo_buffer.reserve(nr_spheres * data_length);
-
-  for (size_t i = 0; i < nr_spheres * data_length; ++i) {
-    particle_vbo_buffer.push_back(0.0f);
-  }
+  this->data_length = 4 * sizeof(GL_FLOAT) + sizeof(GL_UNSIGNED_BYTE);
+  this->particle_vbo_buffer = malloc(nr_spheres * data_length);
+  memset((char*)particle_vbo_buffer, 0, nr_spheres * data_length);
 
   GLfloat *vertices = NULL;
   GLfloat *normals = NULL;
@@ -107,8 +104,11 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   // Create the vbo used for the instanced rendering
   vbo_instanced = util::createEmptyVbo(nr_spheres * data_length);
 
-  util::addInstancedAttribute(vao, vbo_instanced, 1, 4, data_length, 0);
-  util::addInstancedAttribute(vao, vbo_instanced, 2, 1, data_length, 4);
+  GLsizei stride = data_length;
+  int type_offset = 4 * sizeof(GL_FLOAT);
+
+  util::addInstancedAttribute(vao, vbo_instanced, 1, 4, stride, 0, false);
+  util::addInstancedAttribute(vao, vbo_instanced, 2, 1, stride, type_offset, true);
 
   // bind the attributes to the shader
 
@@ -153,6 +153,7 @@ void Sphere::clean_up() {
   glDeleteBuffers(1, &vbo_vertices);
   glDeleteBuffers(1, &vbo_indices);
   glDeleteBuffers(1, &vbo_instanced);
+  free(particle_vbo_buffer);
 }
 
 void Sphere::setCircleTable(GLfloat **sint, GLfloat **cost, const int n,

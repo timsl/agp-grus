@@ -93,16 +93,17 @@ void display(GLFWwindow *window) {
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
   glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
   
-  auto iter = sphere->particle_vbo_buffer.begin();
+  auto iter = sphere->particle_vbo_buffer;
 
   sphere->prepare_render(g_default_vao);
   for (const auto &p : world->particles) {
     glm::mat4 M = glm::translate(p.pos);
     util::storeModelViewMatrix(M, iter);
-    (*iter++) = p.type;
+    util::storeByte(p.type, iter);
+    iter += sphere->data_length;
   }
 
-  util::updateVbo(sphere->vbo_instanced, &sphere->particle_vbo_buffer[0],
+  util::updateVbo(sphere->vbo_instanced, sphere->particle_vbo_buffer,
                   sphere->data_length * DEFAULT_NUM_PARTICLES);
 
   sphere->render();

@@ -1,4 +1,3 @@
-
 #include "common.hpp"
 #include "util.hpp"
 
@@ -125,33 +124,40 @@ GLuint util::createEmptyVbo(int nr_floats) {
 }
 
 void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
-                                 int dataSize, int instancedDataLength,
-                                 int offset) {
+                                 int dataSize, GLsizei stride, size_t offset,
+                                 bool integral) {
   glBindVertexArray(vao);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE,
-                        instancedDataLength * sizeof(GL_FLOAT),
-                        (GLvoid *)(offset * sizeof(GL_FLOAT)));
+
+  if (integral) {
+    glVertexAttribIPointer(attribute, dataSize, GL_UNSIGNED_BYTE, stride,
+                           (GLvoid *)(offset));
+  } else {
+    glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE, stride,
+                          (GLvoid *)(offset));
+  }
 
   glVertexAttribDivisor(attribute, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
 
-void util::updateVbo(GLuint vbo, float* data, int nr_floats) {
+void util::updateVbo(GLuint vbo, void *data, int nr) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, nr_floats * sizeof(GL_FLOAT), NULL,
-               GL_STREAM_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, nr_floats * sizeof(GL_FLOAT), data);
+  glBufferData(GL_ARRAY_BUFFER, nr, NULL, GL_STREAM_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, nr, data);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void util::storeModelViewMatrix(glm::mat4 MV, std::vector<float>::iterator &iter) { 
-  auto *ptr = glm::value_ptr(MV[3]);
-  std::copy(ptr, ptr+4, iter);
-  iter += 4;
+void util::storeModelViewMatrix(glm::mat4 MV, void *to_ptr) {
+  auto *floats_ptr = glm::value_ptr(MV[3]);
+  std::copy(floats_ptr, floats_ptr + 4, (float*)to_ptr);
 }
 
-void util::bindAttrib(GLuint program, int attribute, char* variable_name) {
-    glBindAttribLocation(program, attribute, variable_name);
+void util::storeByte(char b, void *to_ptr) {
+  *((char*)to_ptr + 16) = b;
+}
+
+void util::bindAttrib(GLuint program, int attribute, char *variable_name) {
+  glBindAttribLocation(program, attribute, variable_name);
 }
