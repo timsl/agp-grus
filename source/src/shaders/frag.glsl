@@ -1,11 +1,12 @@
-#version 330 core
+#version 450 core
+
+flat in uint c_type;
 
 uniform vec4 uColor[4];
-uniform int uType;
 
 out vec4 FragColor;
 
 void main()
 {
-	FragColor = uColor[uType];
+        FragColor = uColor[c_type];
 }

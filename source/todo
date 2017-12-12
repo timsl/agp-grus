@@ -1,0 +1,3 @@
+move sphere to worldstate
+arrange the gpu work like they did in nvidia gems
+interop CUDA OPENGL

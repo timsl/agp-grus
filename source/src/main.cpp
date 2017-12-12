@@ -11,15 +11,16 @@ using namespace agp;
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
 GLint type_loc = -1;
-GLint MVP_loc = -1;
+GLint VP_loc = -1;
 GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 1000;
+int DEFAULT_NUM_PARTICLES = 2000;
 
 WorldState *world;
+Sphere *sphere;
 
 void init() {
   // Generate and bind the default VAO
@@ -50,8 +51,8 @@ void init() {
     fprintf(stderr, "Error while getting uniform location");
   }
 
-  MVP_loc = glGetUniformLocation(shader_program, "MVP");
-  if (MVP_loc == -1) {
+  VP_loc = glGetUniformLocation(shader_program, "VP");
+  if (VP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
   }
 
@@ -72,10 +73,14 @@ void init() {
     glUniform4fv(color_loc, 4, colorvec.data());
   }
 
-  world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()), world->particles.size());
+  world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
+                  world->particles.size());
+  sphere = new Sphere(188.39f, 16, 8, 1, g_default_vao, DEFAULT_NUM_PARTICLES,
+                      shader_program);
 }
 
 void release() {
+  sphere->clean_up();
   world->gpu.clean();
 
   // Release the default VAO
@@ -99,20 +104,23 @@ void display(GLFWwindow *window) {
 
   V = glm::lookAt(c.pos, c.dir + c.pos, c.up);
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
+  glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
 
+  auto iter = sphere->particle_vbo_buffer;
+
+  sphere->prepare_render(g_default_vao);
   for (const auto &p : world->particles) {
-    glm::mat4 M;
-    M = glm::translate(M, p.pos);
-
-    glm::mat4 MVP = P * V * M;
-    glUniformMatrix4fv(MVP_loc, 1, GL_FALSE, glm::value_ptr(MVP));
-
-    glUniform1i(type_loc, p.type);
-    // Render a sphere
-    agp::glut::glutSolidSphere(188.39f, 16, 8);
-    // glUniform4f(color_loc, 0.7, 0.7, 0.7, 1.0);
-    // agp::glut::glutWireSphere(0.5f, 16, 8);
+    glm::mat4 M = glm::translate(p.pos);
+    util::storeModelViewMatrix(M, iter);
+    util::storeByte(p.type, iter);
+    iter = (char *)iter + sphere->data_length;
   }
+
+  util::updateVbo(sphere->vbo_instanced, sphere->particle_vbo_buffer,
+                  sphere->data_length * DEFAULT_NUM_PARTICLES);
+
+  sphere->render();
+  sphere->finish_render();
 
   // Swap buffers and force a redisplay
   glfwSwapBuffers(window);
@@ -140,8 +148,8 @@ int main(int argc, char **argv) {
   }
 
   // Setup the OpenGL context version
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -175,7 +183,6 @@ int main(int argc, char **argv) {
   // Initialize the 3D view
   init();
 
-
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
@@ -188,7 +195,7 @@ int main(int argc, char **argv) {
     display(window);
   }
 
-    // Release all the allocated memory
+  // Release all the allocated memory
   release();
 
   // Release GLFW
