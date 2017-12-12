@@ -36,6 +36,9 @@ void init() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_ALWAYS);
+
   // Init shaders. I let the program be global so I can delete it on exit.
   shader_program = util::loadShaders(VERT_FILE, FRAG_FILE);
   glUseProgram(shader_program);
@@ -100,7 +103,7 @@ void display(GLFWwindow *window) {
     glm::mat4 M = glm::translate(p.pos);
     util::storeModelViewMatrix(M, iter);
     util::storeByte(p.type, iter);
-    iter += sphere->data_length;
+    iter = (char*)iter + sphere->data_length;
   }
 
   util::updateVbo(sphere->vbo_instanced, sphere->particle_vbo_buffer,

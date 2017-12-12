@@ -110,12 +110,6 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   util::addInstancedAttribute(vao, vbo_instanced, 1, 4, stride, 0, false);
   util::addInstancedAttribute(vao, vbo_instanced, 2, 1, stride, type_offset, true);
 
-  // bind the attributes to the shader
-
-  util::bindAttrib(program, 0, "pos");
-  util::bindAttrib(program, 1, "M");
-  util::bindAttrib(program, 2, "type");
-
   this->element_size = sizeof(stripIdx[0]) * nVertIdxsPerPart;
 
   // Release the allocations and buffers
