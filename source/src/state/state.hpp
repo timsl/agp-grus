@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "heldactions.hpp"
 #include <math.h>
+#include "gpustate.cuh"
 #include <random>
 
 const int PERIOD = 100;
@@ -42,9 +43,11 @@ struct WindowState {
 
 struct WorldState {
   CameraState cam;
-  std::vector<Particle> particles;
   WindowState window;
   HeldActions held;
+  GPUState gpu;
+
+  std::vector<Particle> particles;
   std::vector<glm::vec4> colors;
 
   void create_planets(std::vector<Particle> &particles, float radius_1,

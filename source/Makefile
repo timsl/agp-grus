@@ -14,7 +14,7 @@ BASEDIR := $(PWD)
 LIBDIR  := -L $(BASEDIR)/bin/glad/lib64
 BINDIR  := $(BASEDIR)/bin
 OBJDIR  := $(BINDIR)/obj
-SRCDIRSR:= src/ src/util/ src/sphere/ src/state/ src/input/ src/kernel/
+SRCDIRSR:= src/ src/util/ src/sphere/ src/state/ src/input/ src/kernel/ src/gpustate/
 SRCDIRS := $(addprefix $(BASEDIR)/,$(SRCDIRSR))
 INCDIR  := $(addprefix -I,$(SRCDIRS)) -I$(BASEDIR)/glad/include/glad/ -I$(CUDASAMPLESLOC)
 
@@ -23,7 +23,7 @@ MKDIR   := mkdir -p
 
 VPATH   := $(BINDIR) $(OBJDIR) $(SRCDIRS)
 SRCS    := $(wildcard $(BASEDIR)/src/**/*.cpp $(BASEDIR)/src/*.cpp)
-OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o kernel.o
+OBJS    := $(patsubst %.cpp,%.o,$(notdir $(SRCS))) bin/glad/glad.o kernel.o gpustate.o
 
 all: setup moon
 
@@ -43,7 +43,6 @@ moon: $(OBJS)
 main.o sphere.o state.o util.o input.o: common.hpp bin/glad/glad.o
 state.o input.o: heldactions.hpp
 main.o: input.hpp input.cpp sphere.cpp sphere.hpp input.cpp input.hpp util.hpp util.cpp state.cpp state.hpp
-kernel.cubin: state.hpp state.cpp
 main.o input.o: kernel.cu kernel.cuh
 %.o: %.hpp
 

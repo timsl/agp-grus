@@ -101,25 +101,12 @@ void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
   const auto block_size = 256;
 
-  CUParticle *d_p = 0;
-  float3 *d_v = 0;
-
-  CUDAERR(cudaMalloc(&d_p, N * sizeof(*d_p)));
-  CUDAERR(cudaMalloc(&d_v, N * sizeof(*d_v)));
-
-  // glm is memory compatible with float3 so a struct should be aswell
-  CUParticle *particles =
-    reinterpret_cast<CUParticle *>(world->particles.data());
-  CUDAERR(cudaMemcpy(d_p, particles, N * sizeof(*d_p), cudaMemcpyHostToDevice));
-
   calculate_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
-      d_p, d_v, N, dt);
-  apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(d_p, d_v,
-                                                                      N, dt);
+                                                                          world->gpu.particles, world->gpu.velocities, N, dt);
+  apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
+                                                                      world->gpu.particles, world->gpu.velocities, N, dt);
 
-  CUDAERR(cudaMemcpy(particles, d_p, N * sizeof(*particles),
+  CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
+  CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
                      cudaMemcpyDeviceToHost));
-
-  CUDAERR(cudaFree(d_p));
-  CUDAERR(cudaFree(d_v));
 }

@@ -71,9 +71,13 @@ void init() {
     }
     glUniform4fv(color_loc, 4, colorvec.data());
   }
+
+  world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()), world->particles.size());
 }
 
 void release() {
+  world->gpu.clean();
+
   // Release the default VAO
   glDeleteVertexArrays(1, &g_default_vao);
 
@@ -171,6 +175,7 @@ int main(int argc, char **argv) {
   // Initialize the 3D view
   init();
 
+
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
@@ -183,7 +188,7 @@ int main(int argc, char **argv) {
     display(window);
   }
 
-  // Release all the allocated memory
+    // Release all the allocated memory
   release();
 
   // Release GLFW
