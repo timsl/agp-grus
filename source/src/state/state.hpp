@@ -6,6 +6,7 @@
 #include <math.h>
 #include "gpustate.cuh"
 #include <random>
+#include "sphere.hpp"
 
 const int PERIOD = 100;
 enum PlanetProperty : char {
@@ -46,9 +47,11 @@ struct WorldState {
   WindowState window;
   HeldActions held;
   GPUState gpu;
-
+  
   std::vector<Particle> particles;
   std::vector<glm::vec4> colors;
+ 
+  Sphere *sphere;
 
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,

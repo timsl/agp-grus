@@ -1,7 +1,6 @@
 #include "common.hpp"
 #include "input.hpp"
 #include "kernel.cuh"
-#include "sphere.hpp"
 #include "state.hpp"
 #include "util.hpp"
 
@@ -19,7 +18,6 @@ constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 int DEFAULT_NUM_PARTICLES = 4000;
 
 WorldState *world;
-Sphere *sphere;
 
 void init() {
   // Generate and bind the default VAO
@@ -69,12 +67,11 @@ void init() {
 
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
                   world->particles.size());
-  sphere = new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES,
+  world->sphere = new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES,
                       shader_program);
 }
 
 void release() {
-  sphere->clean_up();
   world->gpu.clean();
 
   // Release the default VAO
@@ -88,6 +85,9 @@ void display(GLFWwindow *window) {
   // Clear the screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // get the sphere object from world
+  Sphere *sphere_object = world->sphere;
+
   // Do mvp stuff
   // This needs to be here since we may revise the model/view/proj while running
   // Could cache it I guess, and only change on demand, but here is ok
@@ -100,21 +100,21 @@ void display(GLFWwindow *window) {
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
   glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
 
-  auto iter = sphere->particle_vbo_buffer;
+  auto iter = sphere_object->particle_vbo_buffer;
 
-  sphere->prepare_render();
+  sphere_object->prepare_render();
   for (const auto &p : world->particles) {
     glm::mat4 M = glm::translate(p.pos);
     util::storeModelViewMatrix(M, iter);
     util::storeByte(p.type, iter);
-    iter = (char *)iter + sphere->data_length;
+    iter = (char *)iter + sphere_object->data_length;
   }
 
-  util::updateVbo(sphere->vbo_instanced, sphere->particle_vbo_buffer,
-                  sphere->data_length * DEFAULT_NUM_PARTICLES);
+  util::updateVbo(sphere_object->vbo_instanced, sphere_object->particle_vbo_buffer,
+                  sphere_object->data_length * DEFAULT_NUM_PARTICLES);
 
-  sphere->render();
-  sphere->finish_render();
+  sphere_object->render();
+  sphere_object->finish_render();
 
   // Swap buffers and force a redisplay
   glfwSwapBuffers(window);
