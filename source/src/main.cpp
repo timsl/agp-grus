@@ -10,14 +10,13 @@ using namespace agp;
 
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
-GLint type_loc = -1;
 GLint VP_loc = -1;
 GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 2000;
+int DEFAULT_NUM_PARTICLES = 4000;
 
 WorldState *world;
 Sphere *sphere;
@@ -46,11 +45,6 @@ void init() {
     fprintf(stderr, "Error while getting uniform location");
   }
 
-  type_loc = glGetUniformLocation(shader_program, "uType");
-  if (type_loc == -1) {
-    fprintf(stderr, "Error while getting uniform location");
-  }
-
   VP_loc = glGetUniformLocation(shader_program, "VP");
   if (VP_loc == -1) {
     fprintf(stderr, "Error while getting uniform location");
@@ -75,7 +69,7 @@ void init() {
 
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
                   world->particles.size());
-  sphere = new Sphere(188.39f, 16, 8, 1, g_default_vao, DEFAULT_NUM_PARTICLES,
+  sphere = new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES,
                       shader_program);
 }
 
@@ -108,7 +102,7 @@ void display(GLFWwindow *window) {
 
   auto iter = sphere->particle_vbo_buffer;
 
-  sphere->prepare_render(g_default_vao);
+  sphere->prepare_render();
   for (const auto &p : world->particles) {
     glm::mat4 M = glm::translate(p.pos);
     util::storeModelViewMatrix(M, iter);

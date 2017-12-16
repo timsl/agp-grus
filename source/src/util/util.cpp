@@ -157,7 +157,3 @@ void util::storeModelViewMatrix(glm::mat4 MV, void *to_ptr) {
 void util::storeByte(char b, void *to_ptr) {
   *((char*)to_ptr + 16) = b;
 }
-
-void util::bindAttrib(GLuint program, int attribute, char *variable_name) {
-  glBindAttribLocation(program, attribute, variable_name);
-}

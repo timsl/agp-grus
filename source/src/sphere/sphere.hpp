@@ -5,6 +5,7 @@
 #include "util.hpp"
 
 struct Sphere {
+  GLuint vao_sphere;
   GLuint vbo_vertices;
   GLuint vbo_indices;
   GLuint vbo_instanced;
@@ -18,15 +19,15 @@ struct Sphere {
   void *particle_vbo_buffer;
   unsigned data_length;
 
-  Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
+  Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
          GLint n_particles, GLuint program);
   void generate_sphere(GLfloat radius, GLint slices, GLint stacks,
                        GLfloat *verticies, GLfloat *normals);
-  void prepare_render(GLuint vao);
+  void prepare_render();
   void render();
   void finish_render();
   void setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
-                      const GLboolean halfCircle); 
+                      const GLboolean halfCircle);
   void clean_up();
 };
 

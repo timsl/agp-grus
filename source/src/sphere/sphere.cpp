@@ -5,8 +5,10 @@
 using namespace std;
 using namespace agp;
 
-Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
+Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
                GLint n_particles, GLuint program) {
+
+  glGenVertexArrays(1, &vao_sphere);
 
   this->radius = radius;
   this->slices = slices;
@@ -14,7 +16,7 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   this->nr_spheres = n_particles;
   this->data_length = 4 * sizeof(GL_FLOAT) + sizeof(GL_UNSIGNED_BYTE);
   this->particle_vbo_buffer = malloc(nr_spheres * data_length);
-  memset((char*)particle_vbo_buffer, 0, nr_spheres * data_length);
+  memset((char *)particle_vbo_buffer, 0, nr_spheres * data_length);
 
   GLfloat *vertices = NULL;
   GLfloat *normals = NULL;
@@ -77,7 +79,7 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   }
 
   // create vbo for sphere
-  glBindVertexArray(vao);
+  glBindVertexArray(vao_sphere);
   glGenBuffers(1, &vbo_vertices);
   glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 
@@ -107,8 +109,10 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   GLsizei stride = data_length;
   int type_offset = 4 * sizeof(GL_FLOAT);
 
-  util::addInstancedAttribute(vao, vbo_instanced, 1, 4, stride, 0, false);
-  util::addInstancedAttribute(vao, vbo_instanced, 2, 1, stride, type_offset, true);
+  util::addInstancedAttribute(vao_sphere, vbo_instanced, 1, 4, stride, 0,
+                              false);
+  util::addInstancedAttribute(vao_sphere, vbo_instanced, 2, 1, stride,
+                              type_offset, true);
 
   this->element_size = sizeof(stripIdx[0]) * nVertIdxsPerPart;
 
@@ -118,8 +122,8 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLuint vao,
   free(vertices);
 }
 
-void Sphere::prepare_render(GLuint vao) {
-  glBindVertexArray(vao);
+void Sphere::prepare_render() {
+  glBindVertexArray(vao_sphere);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
@@ -147,6 +151,7 @@ void Sphere::clean_up() {
   glDeleteBuffers(1, &vbo_vertices);
   glDeleteBuffers(1, &vbo_indices);
   glDeleteBuffers(1, &vbo_instanced);
+  glDeleteVertexArrays(1, &vao_sphere);
   free(particle_vbo_buffer);
 }
 
