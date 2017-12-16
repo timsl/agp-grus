@@ -147,7 +147,7 @@ void Sphere::finish_render() {
   glBindVertexArray(0);
 }
 
-void Sphere::clean_up() {
+Sphere::~Sphere() {
   glDeleteBuffers(1, &vbo_vertices);
   glDeleteBuffers(1, &vbo_indices);
   glDeleteBuffers(1, &vbo_instanced);

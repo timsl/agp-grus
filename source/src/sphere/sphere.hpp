@@ -1,7 +1,6 @@
 #ifndef _AGP_SPHERE_H
 #define _AGP_SPHERE_H
 
-#include "state.hpp"
 #include "util.hpp"
 
 struct Sphere {
@@ -19,8 +18,9 @@ struct Sphere {
   void *particle_vbo_buffer;
   unsigned data_length;
 
-  Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
-         GLint n_particles, GLuint program);
+  Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLint n_particles,
+         GLuint program);
+  ~Sphere();
   void generate_sphere(GLfloat radius, GLint slices, GLint stacks,
                        GLfloat *verticies, GLfloat *normals);
   void prepare_render();
@@ -28,7 +28,6 @@ struct Sphere {
   void finish_render();
   void setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
                       const GLboolean halfCircle);
-  void clean_up();
 };
 
 #endif
