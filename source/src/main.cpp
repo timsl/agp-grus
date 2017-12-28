@@ -73,6 +73,7 @@ void init() {
 
 void release() {
   world->gpu.clean();
+  delete world->sphere;
 
   // Release the default VAO
   glDeleteVertexArrays(1, &g_default_vao);
