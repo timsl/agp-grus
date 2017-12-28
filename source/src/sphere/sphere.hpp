@@ -15,7 +15,7 @@ struct Sphere {
   GLint nr_spheres;
   GLint nVertIdxsPerPart;
   size_t element_size;
-  void *particle_vbo_buffer;
+  // void *particle_vbo_buffer;
   unsigned data_length;
 
   Sphere(GLfloat radius, GLint slices, GLint stacks, int n, GLint n_particles,

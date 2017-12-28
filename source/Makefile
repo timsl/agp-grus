@@ -44,6 +44,7 @@ main.o sphere.o state.o util.o input.o: common.hpp bin/glad/glad.o
 state.o input.o: heldactions.hpp
 main.o: input.hpp input.cpp sphere.cpp sphere.hpp input.cpp input.hpp util.hpp util.cpp state.cpp state.hpp
 main.o input.o: kernel.cu kernel.cuh
+kernel.o: gpustate.cuh gpustate.cu state.hpp state.cpp
 %.o: %.hpp
 
 setup:

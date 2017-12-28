@@ -100,19 +100,20 @@ void display(GLFWwindow *window) {
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
   glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
 
-  auto iter = sphere_object->particle_vbo_buffer;
 
   sphere_object->prepare_render();
-  for (const auto &p : world->particles) {
-    glm::mat4 M = glm::translate(p.pos);
-    util::storeModelViewMatrix(M, iter);
-    util::storeByte(p.type, iter);
-    iter = (char *)iter + sphere_object->data_length;
-  }
 
-  util::updateVbo(sphere_object->vbo_instanced,
-                  sphere_object->particle_vbo_buffer,
-                  sphere_object->data_length * DEFAULT_NUM_PARTICLES);
+  // auto iter = sphere_object->particle_vbo_buffer;
+  // for (const auto &p : world->particles) {
+  //   glm::mat4 M = glm::translate(p.pos);
+  //   util::storeModelViewMatrix(M, iter);
+  //   util::storeByte(p.type, iter);
+  //   iter = (char *)iter + sphere_object->data_length;
+  // }
+
+  // util::updateVbo(sphere_object->vbo_instanced,
+  //                 sphere_object->particle_vbo_buffer,
+  //                 sphere_object->data_length * DEFAULT_NUM_PARTICLES);
 
   sphere_object->render();
   sphere_object->finish_render();

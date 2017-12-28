@@ -15,8 +15,8 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
   this->stacks = stacks;
   this->nr_spheres = n_particles;
   this->data_length = 4 * sizeof(GL_FLOAT) + sizeof(GL_UNSIGNED_BYTE);
-  this->particle_vbo_buffer = malloc(nr_spheres * data_length);
-  memset((char *)particle_vbo_buffer, 0, nr_spheres * data_length);
+  // this->particle_vbo_buffer = malloc(nr_spheres * data_length);
+  // memset((char *)particle_vbo_buffer, 0, nr_spheres * data_length);
 
   GLfloat *vertices = NULL;
   GLfloat *normals = NULL;
@@ -152,7 +152,7 @@ Sphere::~Sphere() {
   glDeleteBuffers(1, &vbo_indices);
   glDeleteBuffers(1, &vbo_instanced);
   glDeleteVertexArrays(1, &vao_sphere);
-  free(particle_vbo_buffer);
+  // free(particle_vbo_buffer);
 }
 
 void Sphere::setCircleTable(GLfloat **sint, GLfloat **cost, const int n,
