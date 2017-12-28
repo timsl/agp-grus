@@ -122,7 +122,9 @@ void update(WorldState *world, float dt) {
                                                                       world->gpu.particles, world->gpu.velocities, N, dt);
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(world->gpu.particles, world->gpu.glptr, N);
-  CUDAERR(cudaDeviceSynchronize());
+
+  // CUDAERR(cudaDeviceSynchronize());
+
   // CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
   // CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
   //                    cudaMemcpyDeviceToHost));
