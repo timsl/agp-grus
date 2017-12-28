@@ -65,10 +65,10 @@ void init() {
     glUniform4fv(color_loc, 4, colorvec.data());
   }
 
+  world->sphere =
+    new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES, shader_program);
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
-                  world->particles.size());
-  world->sphere = new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES,
-                      shader_program);
+                  world->particles.size(), world->sphere->vbo_instanced);
 }
 
 void release() {
@@ -110,7 +110,8 @@ void display(GLFWwindow *window) {
     iter = (char *)iter + sphere_object->data_length;
   }
 
-  util::updateVbo(sphere_object->vbo_instanced, sphere_object->particle_vbo_buffer,
+  util::updateVbo(sphere_object->vbo_instanced,
+                  sphere_object->particle_vbo_buffer,
                   sphere_object->data_length * DEFAULT_NUM_PARTICLES);
 
   sphere_object->render();

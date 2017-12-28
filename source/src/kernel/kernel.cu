@@ -97,6 +97,14 @@ __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
   particles[i].pos += particles[i].velocity * dt;
 }
 
+__global__ void update_GL(CUParticle *particles, void *glptr, size_t n){
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i >= n)
+    return;
+
+
+}
+
 void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
   const auto block_size = 256;
@@ -106,7 +114,8 @@ void update(WorldState *world, float dt) {
   apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
                                                                       world->gpu.particles, world->gpu.velocities, N, dt);
 
-  CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
-  CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
-                     cudaMemcpyDeviceToHost));
+  update_GL<<<(N + block_size - 1) / block_size, block_size>>>(world->gpu.particles, world->gpu.glptr, N);
+  // CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
+  // CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
+  //                    cudaMemcpyDeviceToHost));
 }

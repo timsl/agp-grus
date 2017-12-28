@@ -16,4 +16,6 @@ __global__ void calculate_velocities(const CUParticle *particles, float3 *veloci
 __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
                                  size_t n, float dt);
 
+__global__ void update_GL(CUParticle *particles, void *glptr, size_t n);
+
 #endif

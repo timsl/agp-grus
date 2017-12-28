@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <glad.h>
-#include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
