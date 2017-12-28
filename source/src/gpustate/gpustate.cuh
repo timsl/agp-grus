@@ -27,7 +27,6 @@ struct GPUState {
   CUParticle *particles = 0;
   float3 *velocities = 0;
   struct cudaGraphicsResource *resources = 0;
-  cudaStream_t cuda_stream;
   void *glptr = 0;
 
   // We init worldstate pretty long before cuda is up, so use separate methods

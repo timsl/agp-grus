@@ -10,13 +10,13 @@ void GPUState::init(const CUParticle *in, size_t n, GLuint vbo_sphere_inst) {
 
   CUDAERR(cudaGraphicsGLRegisterBuffer(&resources, vbo_sphere_inst,
                                        cudaGraphicsMapFlagsNone));
-  CUDAERR(cudaGraphicsMapResources(1, &resources, cuda_stream));
+  CUDAERR(cudaGraphicsMapResources(1, &resources));
   size_t size = 0;
   CUDAERR(cudaGraphicsResourceGetMappedPointer(&glptr, &size, resources));
 }
 
 void GPUState::clean() {
-  CUDAERR(cudaGraphicsUnmapResources(1, &resources, cuda_stream));
+  CUDAERR(cudaGraphicsUnmapResources(1, &resources));
   CUDAERR(cudaGraphicsUnregisterResource(resources));
   CUDAERR(cudaFree(particles));
   CUDAERR(cudaFree(velocities));
