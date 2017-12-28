@@ -14,7 +14,8 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
   this->slices = slices;
   this->stacks = stacks;
   this->nr_spheres = n_particles;
-  this->data_length = 4 * sizeof(GL_FLOAT) + sizeof(GL_UNSIGNED_BYTE);
+  this->data_length = 4 * sizeof(GL_FLOAT) + sizeof(GL_UNSIGNED_INT);
+  assert(data_length == 20);
   // this->particle_vbo_buffer = malloc(nr_spheres * data_length);
   // memset((char *)particle_vbo_buffer, 0, nr_spheres * data_length);
 

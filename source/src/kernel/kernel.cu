@@ -102,9 +102,9 @@ __global__ void update_GL(CUParticle *particles, void *glptr, size_t n){
   if (i >= n)
     return;
 
-  char *offset = (char*)(glptr) + 17*i;
-  float *M_part = (float*)offset;
-  char *type_part = (char*)offset + 16;
+  char *offset = (char*)(glptr) + 20*i;
+  GLfloat *M_part = (GLfloat*)offset;
+  GLuint *type_part = (GLuint*)(offset + 16);
   M_part[0] = particles[i].pos.x;
   M_part[1] = particles[i].pos.y;
   M_part[2] = particles[i].pos.z;
@@ -122,7 +122,7 @@ void update(WorldState *world, float dt) {
                                                                       world->gpu.particles, world->gpu.velocities, N, dt);
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(world->gpu.particles, world->gpu.glptr, N);
-  cudaDeviceSynchronize();
+  CUDAERR(cudaDeviceSynchronize());
   // CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
   // CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
   //                    cudaMemcpyDeviceToHost));
