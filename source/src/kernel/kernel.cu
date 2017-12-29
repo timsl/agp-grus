@@ -16,16 +16,9 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   const double weirdscale1 = pow(10, -16);
   const double weirdscale2 = pow(10, -22);
 
-  const float3 p_i = pi.pos;
-  const float3 v_i = pi.velocity;
-  const char t_i = pi.type;
-
-  const float3 p_j = pj.pos;
-  const float3 v_j = pj.velocity;
-  const char t_j = pj.type;
-
-  const auto diff = p_j - p_i;
-  const auto next_diff = ((p_j + v_j * 0.00001) - (p_i + v_i * 0.00001));
+  const auto diff = pj.pos - pi.pos;
+  const auto next_diff =
+      ((pj.pos + pj.velocity * 0.00001) - (pi.pos + pi.velocity * 0.00001));
 
   double r = norm3d(diff.x, diff.y, diff.z);
   const double next_r = norm3d(next_diff.x, next_diff.y, next_diff.z);
@@ -36,30 +29,31 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   // pre-computed values
   r = fmax(r, epsilon);
   const double r2 = pow(r, 2);
-  const double gmm = G * M[t_i] * M[t_j] * pow(r, -2) * weirdscale1;
+  const double gmm = G * M[pi.type] * M[pj.type] * pow(r, -2) * weirdscale1;
   const double dmr = (D2 - r2) * 0.5 * weirdscale2;
-  const double oneshell = fmin(SDP[t_i], SDP[t_j]);
-  const double twoshell = fmax(SDP[t_i], SDP[t_j]);
+  const double oneshell = fmin(SDP[pi.type], SDP[pj.type]);
+  const double twoshell = fmax(SDP[pi.type], SDP[pj.type]);
 
   if (r >= D) {
     // Not in contact
     force = gmm;
   } else if (r >= D - D * oneshell) {
     // In contact, but no shell penetrated
-    force = gmm - dmr * (K[t_i] + K[t_j]);
+    force = gmm - dmr * (K[pi.type] + K[pj.type]);
   } else if (r >= D - D * twoshell) {
     // One shell has been penetrated
     if (next_r < r) {
-      force = gmm - dmr * (K[t_i] + K[t_j]);
+      force = gmm - dmr * (K[pi.type] + K[pj.type]);
     } else {
-      force = gmm - dmr * (K[t_i] * KRP[t_i] + K[t_j]);
+      force = gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type]);
     }
   } else {
     // Both shells penetrated (r > epsilon)
     if (next_r < r) {
-      force = gmm - dmr * (K[t_i] + K[t_j]);
+      force = gmm - dmr * (K[pi.type] + K[pj.type]);
     } else {
-      force = gmm - dmr * (K[t_i] * KRP[t_i] + K[t_j] * KRP[t_j]);
+      force =
+          gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type] * KRP[pj.type]);
     }
   }
 
