@@ -1,11 +1,12 @@
 # agp-grus
+## Measures
 We measure distance in KM, and time units in seconds.
 
-# Running
+## Running
 You will need `glm`, `glfw`, `OpenGL`, and `CUDA` installed somewhere in PATH.
 
 Then do
-```bash
+```sh
 cd source
 make run
 ```
