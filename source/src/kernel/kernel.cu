@@ -68,14 +68,28 @@ __global__ void calculate_velocities(const CUParticle *particles,
 
   // Want a local velocity to write to in each loop to save some global
   // bandwidth
+  const CUParticle my_part = particles[i];
   float3 vel_acc = make_float3(0.0, 0.0, 0.0);
 
-  for (size_t j = 0; j < n; ++j) {
-    if (j == i) {
-      continue;
-    }
+  extern __shared__ CUParticle sh_part[];
 
-    vel_acc += body_body_interaction(particles[i], particles[j]);
+  const size_t sync_size = blockDim.x;
+  const size_t sync_points = n / sync_size;
+
+  for (size_t sync = 0; sync < sync_points; ++sync) {
+    // read global memory and put in sh_part instead.
+    // put in some j corresponding to this threads idx.
+    sh_part[threadIdx.x] = particles[sync * sync_size + threadIdx.x];
+    __syncthreads();
+
+    for (size_t j = 0; j < sync_size; ++j) {
+      if (sync * sync_size + j == i) {
+        continue;
+      }
+
+      vel_acc += body_body_interaction(my_part, sh_part[j]);
+    }
+    __syncthreads();
   }
 
   velocities[i] = vel_acc * dt;
@@ -93,14 +107,16 @@ __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
 
 void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
-  const auto block_size = 256;
+  const auto block_size = 32;
 
-  calculate_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
-                                                                          world->gpu.particles, world->gpu.velocities, N, dt);
+  calculate_velocities<<<(N + block_size - 1) / block_size, block_size,
+                         block_size * sizeof(CUParticle)>>>(
+      world->gpu.particles, world->gpu.velocities, N, dt);
   apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
-                                                                      world->gpu.particles, world->gpu.velocities, N, dt);
+      world->gpu.particles, world->gpu.velocities, N, dt);
 
-  update_GL<<<(N + block_size - 1) / block_size, block_size>>>(world->gpu.particles, world->gpu.glptr, N);
+  update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
+      world->gpu.particles, world->gpu.glptr, N);
 
   // CUDAERR(cudaDeviceSynchronize());
 
