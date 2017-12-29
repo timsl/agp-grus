@@ -1,1 +1,2 @@
-arrange the gpu work like they did in nvidia gems
+use leapfrog (or better) integration techniques
+find ways to speed up cuda ?!?!
