@@ -35,4 +35,6 @@ struct GPUState {
   void clean();
 };
 
+__global__ void update_GL(CUParticle *particles, void *glptr, size_t n);
+
 #endif

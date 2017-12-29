@@ -97,21 +97,6 @@ __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
   particles[i].pos += particles[i].velocity * dt;
 }
 
-__global__ void update_GL(CUParticle *particles, void *glptr, size_t n){
-  int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i >= n)
-    return;
-
-  char *offset = (char*)(glptr) + 20*i;
-  GLfloat *M_part = (GLfloat*)offset;
-  GLuint *type_part = (GLuint*)(offset + 16);
-  M_part[0] = particles[i].pos.x;
-  M_part[1] = particles[i].pos.y;
-  M_part[2] = particles[i].pos.z;
-  M_part[3] = 1.0f;
-  type_part[0] = particles[i].type;
-}
-
 void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
   const auto block_size = 256;
