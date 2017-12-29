@@ -1,20 +1,21 @@
 #include "kernel.cuh"
 
-__device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
-  const double D = 376.78;
-  const double D2 = pow(D, 2);
-  const double epsilon = 47.0975;
-  const double M[4] = {1.9549 * pow(10, 10), 7.4161 * pow(10, 9),
-                       1.9549 * pow(10, 10), 7.4161 * pow(10, 9)};
-  const double K[4] = {5.8228 * pow(10, 14), 2.29114 * pow(10, 14),
-                       5.8228 * pow(10, 14), 2.29114 * pow(10, 14)};
-  const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
-  const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
-  const double G = 6.67408; // * 10^-20, but removed that from M and here
+__device__ float3 body_body_interaction(const CUParticle pi,
+                                        const CUParticle pj) {
+  static const double D = 376.78;
+  static const double D2 = D*D;
+  static const double epsilon = 47.0975;
+  static const double M[4] = {1.9549 * 10000000000, 7.4161 * 1000000000,
+                              1.9549 * 10000000000, 7.4161 * 1000000000};
+  static const double K[4] = {5.8228 * 100000000000000, 2.29114 * 100000000000000,
+                              5.8228 * 100000000000000, 2.29114 * 100000000000000};
+  static const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
+  static const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
+  static const double G = 6.67408; // * 10^-20, but removed that from M and here
 
   // These scales are probably not necessary if we use better numerical techs
-  const double weirdscale1 = pow(10, -16);
-  const double weirdscale2 = pow(10, -22);
+  static const double weirdscale1 = 0.0000000000000001;
+  static const double weirdscale2 = 0.0000000000000000000001;
 
   const auto diff = pj.pos - pi.pos;
   const auto next_diff =
