@@ -182,8 +182,8 @@ int main(int argc, char **argv) {
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
-  const float vel_step = 5.8117;
-  firststep(world, vel_step);
+  const float vel_step = 1e-1;
+  first_update(world, vel_step);
   while (!glfwWindowShouldClose(window)) {
     update_held(world, dt);
     t += dt;
