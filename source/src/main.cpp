@@ -48,9 +48,9 @@ void init() {
     fprintf(stderr, "Error while getting uniform location");
   }
 
-  world->create_planets(world->particles, 1800, 6000, 0.3f,
-                        glm::vec3(23925.0f, 0.0f, 9042.7f),
-                        glm::vec3(-23925.0f, 0.0f, -9042.7f));
+  world->create_planets(world->particles, 3185.5f, 6371.0f, 0.3f,
+                        glm::vec3(3185.5f, 0.0f, 0.0f),
+                        glm::vec3(-3185.5f, 0.0f, 0.0f));
 
   // Send colors to opengl
   {
