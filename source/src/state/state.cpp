@@ -3,7 +3,7 @@
 void WorldState::create_planets(std::vector<Particle> &particles,
                                 float radius_1, float radius_2,
                                 float procent_iron, glm::vec3 planet_1_origin,
-                                glm::vec3 planet_2_origin) {
+                                glm::vec3 planet_2_origin, bool use_rotation) {
   int half = particles.size() / 2;
   int nr_iron = half * procent_iron;
   int nr_silicate = half - nr_iron;
@@ -13,26 +13,27 @@ void WorldState::create_planets(std::vector<Particle> &particles,
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
-                inital_velocity, iron_1, omega);
+                inital_velocity, iron_1, omega, use_rotation);
 
   start += nr_iron;
   create_sphere(start, start + nr_silicate, radius_1, radius_2, planet_1_origin,
-                inital_velocity, silicate_1, omega);
+                inital_velocity, silicate_1, omega, use_rotation);
 
   start += nr_silicate;
   create_sphere(start, start + nr_iron, 0, radius_1, planet_2_origin,
-                -1.0f * inital_velocity, iron_2, -1.0f * omega);
+                -1.0f * inital_velocity, iron_2, -1.0f * omega, use_rotation);
 
   start += nr_iron;
   create_sphere(start, start + nr_silicate, radius_1, radius_2, planet_2_origin,
-                -1.0f * inital_velocity, silicate_2, -1.0f * omega);
+                -1.0f * inital_velocity, silicate_2, -1.0f * omega,
+                use_rotation);
 }
 
 template <typename Iter>
 void WorldState::create_sphere(Iter start, Iter end, float radius_1,
                                float radius_2, glm::vec3 planet_origin,
                                glm::vec3 inital_velocity, char prop_type,
-                               float omega) {
+                               float omega, bool use_rotation) {
   // used to generate our random numbers
   std::default_random_engine generator;
   std::uniform_real_distribution<float> dist(0.0, 1.0);
@@ -65,7 +66,9 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
 
     auto added_velocity = glm::vec3(omega * r_xz * std::sin(theta), 0.0f,
                                     -1.0f * omega * r_xz * std::cos(theta));
-    i->velocity += added_velocity;
+    if (use_rotation) {
+      i->velocity += added_velocity;
+    }
   }
 }
 

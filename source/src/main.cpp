@@ -50,7 +50,7 @@ void init() {
 
   world->create_planets(world->particles, 3185.5f, 6371.0f, 0.3f,
                         glm::vec3(3185.5f, 0.0f, 0.0f),
-                        glm::vec3(-3185.5f, 0.0f, 0.0f));
+                        glm::vec3(-3185.5f, 0.0f, 0.0f), true);
 
   // Send colors to opengl
   {
@@ -66,7 +66,7 @@ void init() {
   }
 
   world->sphere =
-    new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES, shader_program);
+      new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES, shader_program);
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
                   world->particles.size(), world->sphere->vbo_instanced);
 }
