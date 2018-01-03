@@ -1,20 +1,20 @@
 #include "kernel.cuh"
 
 __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
-  const double D = 376.78;
-  const double D2 = pow(D, 2);
-  const double epsilon = 47.0975;
-  const double M[4] = {1.9549 * pow(10, 10), 7.4161 * pow(10, 9),
-                       1.9549 * pow(10, 10), 7.4161 * pow(10, 9)};
-  const double K[4] = {5.8228 * pow(10, 14), 2.29114 * pow(10, 14),
-                       5.8228 * pow(10, 14), 2.29114 * pow(10, 14)};
-  const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
-  const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
-  const double G = 6.67408; // * 10^-20, but removed that from M and here
+  static const double D = 376.78;
+  static const double epsilon = 47.0975;
+  static const double M[4] = {1.9549e10, 7.4161e9,
+                       1.9549e10, 7.4161e9};
+  static const double K[4] = {5.8228e14, 2.29114e14,
+                       5.8228e14, 2.29114e14};
+  static const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
+  static const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
+  static const double G = 6.67408; // * 1e-20, but removed that from M and here
 
-  // These scales are probably not necessary if we use better numerical techs
-  const double weirdscale1 = pow(10, -16);
-  const double weirdscale2 = pow(10, -22);
+  // These arbitrary scalings might not necessary if we use better
+  // numerical techniques
+  static const double weirdscale1 = 1e-16;
+  static const double weirdscale2 = 1e-22;
 
   const auto diff = pj.pos - pi.pos;
   const auto next_diff =
@@ -28,9 +28,9 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
 
   // pre-computed values
   r = fmax(r, epsilon);
-  const double r2 = pow(r, 2);
-  const double gmm = G * M[pi.type] * M[pj.type] * pow(r, -2) * weirdscale1;
-  const double dmr = (D2 - r2) * 0.5 * weirdscale2;
+  const double r2 = r*r;
+  const double gmm = G * M[pi.type] * M[pj.type] * (1/r2) * weirdscale1;
+  const double dmr = (D*D - r2) * 0.5 * weirdscale2;
   const double oneshell = fmin(SDP[pi.type], SDP[pj.type]);
   const double twoshell = fmax(SDP[pi.type], SDP[pj.type]);
 
