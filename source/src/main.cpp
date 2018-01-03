@@ -101,7 +101,6 @@ void display(GLFWwindow *window) {
   P = glm::perspective(glm::radians(c.fov), ratio, 1.0f, 10000000.0f);
   glUniformMatrix4fv(VP_loc, 1, GL_FALSE, glm::value_ptr(P * V));
 
-
   sphere_object->prepare_render();
 
   // auto iter = sphere_object->particle_vbo_buffer;
@@ -183,11 +182,13 @@ int main(int argc, char **argv) {
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
+  const float vel_step = 5.8117;
+  firststep(world, vel_step);
   while (!glfwWindowShouldClose(window)) {
     update_held(world, dt);
     t += dt;
     if (world->held.simulation_running) {
-      update(world, 5.8);
+      update(world, vel_step);
     }
     display(window);
   }

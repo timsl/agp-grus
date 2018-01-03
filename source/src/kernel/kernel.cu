@@ -60,16 +60,16 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   return dir * (float)force;
 }
 
-__global__ void calculate_velocities(const CUParticle *particles,
+__global__ void calculate_forces(const CUParticle *particles,
                                      float3 *velocities, size_t n, float dt) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n)
     return;
 
-  // Want a local velocity to write to in each loop to save some global
+  // Want a local force to write to in each loop to save some global
   // bandwidth
   const CUParticle my_part = particles[i];
-  float3 vel_acc = make_float3(0.0, 0.0, 0.0);
+  float3 force_acc = make_float3(0.0, 0.0, 0.0);
 
   extern __shared__ CUParticle sh_part[];
 
@@ -87,12 +87,12 @@ __global__ void calculate_velocities(const CUParticle *particles,
         continue;
       }
 
-      vel_acc += body_body_interaction(my_part, sh_part[j]);
+      force_acc += body_body_interaction(my_part, sh_part[j]);
     }
     __syncthreads();
   }
 
-  velocities[i] = vel_acc * dt;
+  velocities[i] = force_acc;
 }
 
 __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
@@ -101,15 +101,42 @@ __global__ void apply_velocities(CUParticle *particles, float3 *velocities,
   if (i >= n)
     return;
 
-  particles[i].velocity += velocities[i];
+  // We always update pos just after velocity to avoid another kernel.
+  particles[i].velocity += velocities[i] * dt;
   particles[i].pos += particles[i].velocity * dt;
+}
+
+__global__ void apply_first_velocities(CUParticle *particles, float3 *velocities,
+                                 size_t n, float dt) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i >= n)
+    return;
+
+  // First leapfrog step v_{1/2}, need to update vel by only dt/2.
+  // We always update pos just after velocity to avoid another kernel.
+  particles[i].velocity += velocities[i] * dt/2;
+  particles[i].pos += particles[i].velocity * dt;
+}
+
+void firststep(WorldState *world, float dt) {
+  const auto N = world->particles.size();
+  const auto block_size = 32;
+
+  calculate_forces<<<(N + block_size - 1) / block_size, block_size,
+                         block_size * sizeof(CUParticle)>>>(
+      world->gpu.particles, world->gpu.velocities, N, dt);
+  apply_first_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
+      world->gpu.particles, world->gpu.velocities, N, dt);
+
+  update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
+      world->gpu.particles, world->gpu.glptr, N);
 }
 
 void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
   const auto block_size = 32;
 
-  calculate_velocities<<<(N + block_size - 1) / block_size, block_size,
+  calculate_forces<<<(N + block_size - 1) / block_size, block_size,
                          block_size * sizeof(CUParticle)>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
   apply_velocities<<<(N + block_size - 1) / block_size, block_size>>>(
