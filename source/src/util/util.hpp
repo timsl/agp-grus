@@ -1,6 +1,8 @@
 #ifndef _AGP_UTIL_H
 #define _AGP_UTIL_H
 
+#include "common.hpp"
+
 namespace agp {
 namespace util {
 /**
@@ -34,8 +36,7 @@ void updateVbo(GLuint vbo, void *data, int nr);
 void storeModelViewMatrix(glm::mat4 MV, void *to_ptr);
 void storeByte(char b, void *to_ptr);
 
-
-void bindAttrib(GLuint program, int attribute, char* variable_name);
+void bindAttrib(GLuint program, int attribute, char *variable_name);
 } // namespace util
 } // namespace agp
 

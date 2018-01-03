@@ -2,11 +2,11 @@
 #define STATE_HPP
 
 #include "common.hpp"
-#include "heldactions.hpp"
-#include <math.h>
 #include "gpustate.cuh"
-#include <random>
+#include "heldactions.hpp"
 #include "sphere.hpp"
+#include <math.h>
+#include <random>
 
 const int PERIOD = 100;
 enum PlanetProperty : char {
@@ -47,15 +47,16 @@ struct WorldState {
   WindowState window;
   HeldActions held;
   GPUState gpu;
-  
+
   std::vector<Particle> particles;
   std::vector<glm::vec4> colors;
- 
+
   Sphere *sphere;
 
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
-                      glm::vec3 planet_1_origin, glm::vec3 planet_2_origin, bool use_rotation);
+                      glm::vec3 planet_1_origin, glm::vec3 planet_2_origin,
+                      bool use_rotation);
   template <typename Iter>
   void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,

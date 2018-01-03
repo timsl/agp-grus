@@ -9,7 +9,7 @@ void WorldState::create_planets(std::vector<Particle> &particles,
   int nr_silicate = half - nr_iron;
 
   auto initial_velocity = glm::vec3(-3.2416f, 0.0f, 0.0f); // km/s
-  float omega = 3.0973 / 3600.0;                        // rad s⁻1
+  float omega = 3.0973 / 3600.0;                           // rad s⁻1
 
   auto start = particles.begin();
   create_sphere(start, start + nr_iron, 0, radius_1, planet_1_origin,
@@ -62,7 +62,7 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
     float r_xz = std::sqrt(std::pow(i->pos.x - planet_origin.x, 2) +
                            std::pow(i->pos.z - planet_origin.z, 2));
     float theta =
-      std::atan2((i->pos.z - planet_origin.z), (i->pos.x - planet_origin.x));
+        std::atan2((i->pos.z - planet_origin.z), (i->pos.x - planet_origin.x));
 
     auto added_velocity = glm::vec3(omega * r_xz * std::sin(theta), 0.0f,
                                     -1.0f * omega * r_xz * std::cos(theta));

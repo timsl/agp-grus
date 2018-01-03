@@ -3,10 +3,8 @@
 __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   static const double D = 376.78;
   static const double epsilon = 47.0975;
-  static const double M[4] = {1.9549e20, 7.4161e19,
-                              1.9549e20, 7.4161e19};
-  static const double K[4] = {5.8228e14, 2.29114e14,
-                              5.8228e14, 2.29114e14};
+  static const double M[4] = {1.9549e20, 7.4161e19, 1.9549e20, 7.4161e19};
+  static const double K[4] = {5.8228e14, 2.29114e14, 5.8228e14, 2.29114e14};
   static const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
   static const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
   static const double G = 6.67408e-20;
@@ -18,7 +16,7 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
 
   const auto diff = pj.pos - pi.pos;
   const auto next_diff =
-    ((pj.pos + pj.velocity * 1e-5) - (pi.pos + pi.velocity * 1e-5));
+      ((pj.pos + pj.velocity * 1e-5) - (pi.pos + pi.velocity * 1e-5));
 
   double r = length(diff);
   const double next_r = length(next_diff);
@@ -28,9 +26,9 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
 
   // pre-computed values
   r = fmax(r, epsilon);
-  const double r2 = r*r;
-  const double gmm = G * M[pi.type] * M[pj.type] * (1/r2) * weirdscale1;
-  const double dmr = (D*D - r2) * 0.5 * weirdscale2;
+  const double r2 = r * r;
+  const double gmm = G * M[pi.type] * M[pj.type] * (1 / r2) * weirdscale1;
+  const double dmr = (D * D - r2) * 0.5 * weirdscale2;
   const double oneshell = fmin(SDP[pi.type], SDP[pj.type]);
   const double twoshell = fmax(SDP[pi.type], SDP[pj.type]);
 
@@ -53,15 +51,15 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
       force = gmm - dmr * (K[pi.type] + K[pj.type]);
     } else {
       force =
-        gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type] * KRP[pj.type]);
+          gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type] * KRP[pj.type]);
     }
   }
 
   return dir * (float)force;
 }
 
-__global__ void calculate_forces(const CUParticle *particles,
-                                 float3 *forces, size_t n, float dt) {
+__global__ void calculate_forces(const CUParticle *particles, float3 *forces,
+                                 size_t n, float dt) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n)
     return;
@@ -95,8 +93,8 @@ __global__ void calculate_forces(const CUParticle *particles,
   forces[i] = force_acc;
 }
 
-__global__ void apply_forces(CUParticle *particles, float3 *forces,
-                             size_t n, float dt) {
+__global__ void apply_forces(CUParticle *particles, float3 *forces, size_t n,
+                             float dt) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n)
     return;
@@ -114,7 +112,7 @@ __global__ void first_apply_forces(CUParticle *particles, float3 *forces,
 
   // First leapfrog step v_{1/2}, need to update vel by only dt/2.
   // We always update pos just after velocity to avoid another kernel.
-  particles[i].velocity += forces[i] * dt/2;
+  particles[i].velocity += forces[i] * dt / 2;
   particles[i].pos += particles[i].velocity * dt;
 }
 
@@ -123,10 +121,10 @@ void first_update(WorldState *world, float dt) {
   const auto block_size = 32;
 
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
-                         block_size * sizeof(CUParticle)>>>(
+                     block_size * sizeof(CUParticle)>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
   first_apply_forces<<<(N + block_size - 1) / block_size, block_size>>>(
-                                                                        world->gpu.particles, world->gpu.velocities, N, dt);
+      world->gpu.particles, world->gpu.velocities, N, dt);
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);
@@ -137,10 +135,10 @@ void update(WorldState *world, float dt) {
   const auto block_size = 32;
 
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
-                         block_size * sizeof(CUParticle)>>>(
+                     block_size * sizeof(CUParticle)>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
   apply_forces<<<(N + block_size - 1) / block_size, block_size>>>(
-                                                                  world->gpu.particles, world->gpu.velocities, N, dt);
+      world->gpu.particles, world->gpu.velocities, N, dt);
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);

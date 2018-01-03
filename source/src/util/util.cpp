@@ -1,4 +1,3 @@
-#include "common.hpp"
 #include "util.hpp"
 
 using namespace std;

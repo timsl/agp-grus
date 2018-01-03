@@ -1,6 +1,7 @@
 #ifndef _AGP_SPHERE_H
 #define _AGP_SPHERE_H
 
+#include "common.hpp"
 #include "util.hpp"
 
 struct Sphere {

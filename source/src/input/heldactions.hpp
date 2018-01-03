@@ -23,7 +23,7 @@ struct HeldActions {
 
   bool simulation_running = false;
 
-  HeldActions(){}
+  HeldActions() {}
 };
 
 #endif

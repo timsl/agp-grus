@@ -1,7 +1,6 @@
 #ifndef GPUSTATE_HPP
 #define GPUSTATE_HPP
 
-#include <common.hpp>
 #include <cuda_gl_interop.h>
 #include <helper_math.h>
 #include <stdio.h>

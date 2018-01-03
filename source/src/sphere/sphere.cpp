@@ -1,5 +1,3 @@
-
-#include "common.hpp"
 #include "sphere.hpp"
 
 using namespace std;
