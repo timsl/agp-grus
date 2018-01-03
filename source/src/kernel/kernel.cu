@@ -3,13 +3,13 @@
 __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   static const double D = 376.78;
   static const double epsilon = 47.0975;
-  static const double M[4] = {1.9549e10, 7.4161e9,
-                       1.9549e10, 7.4161e9};
+  static const double M[4] = {1.9549e20, 7.4161e19,
+                              1.9549e20, 7.4161e19};
   static const double K[4] = {5.8228e14, 2.29114e14,
-                       5.8228e14, 2.29114e14};
+                              5.8228e14, 2.29114e14};
   static const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
   static const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
-  static const double G = 6.67408; // * 1e-20, but removed that from M and here
+  static const double G = 6.67408e-20;
 
   // These arbitrary scalings might not necessary if we use better
   // numerical techniques
