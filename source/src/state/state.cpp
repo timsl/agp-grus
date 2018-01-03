@@ -62,7 +62,7 @@ void WorldState::create_sphere(Iter start, Iter end, float radius_1,
     float r_xz = std::sqrt(std::pow(i->pos.x - planet_origin.x, 2) +
                            std::pow(i->pos.z - planet_origin.z, 2));
     float theta =
-        std::atan((i->pos.z - planet_origin.z) / (i->pos.x - planet_origin.x));
+      std::atan2((i->pos.z - planet_origin.z), (i->pos.x - planet_origin.x));
 
     auto added_velocity = glm::vec3(omega * r_xz * std::sin(theta), 0.0f,
                                     -1.0f * omega * r_xz * std::cos(theta));
