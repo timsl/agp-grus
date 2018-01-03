@@ -20,8 +20,8 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   const auto next_diff =
       ((pj.pos + pj.velocity * 0.00001) - (pi.pos + pi.velocity * 0.00001));
 
-  double r = norm3d(diff.x, diff.y, diff.z);
-  const double next_r = norm3d(next_diff.x, next_diff.y, next_diff.z);
+  double r = length(diff);
+  const double next_r = length(next_diff);
 
   const auto dir = diff / r;
   double force = 0.0;
