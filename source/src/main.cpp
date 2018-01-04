@@ -7,9 +7,6 @@
 
 #define TIMING 0
 
-using namespace std;
-using namespace agp;
-
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
 GLint VP_loc = -1;
@@ -38,7 +35,7 @@ void init() {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Init shaders. I let the program be global so I can delete it on exit.
-  shader_program = util::loadShaders(VERT_FILE, FRAG_FILE);
+  shader_program = agp::util::loadShaders(VERT_FILE, FRAG_FILE);
   glUseProgram(shader_program);
 
   color_loc = glGetUniformLocation(shader_program, "uColor");
@@ -182,7 +179,7 @@ int main(int argc, char **argv) {
   }
 
   // Display OpenGL information
-  util::displayOpenGLInfo();
+  agp::util::displayOpenGLInfo();
 
   // Initialize the 3D view
   init();
