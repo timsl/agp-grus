@@ -5,6 +5,8 @@
 #include "util.hpp"
 #include <chrono>
 
+#define TIMING 1
+
 using namespace std;
 using namespace agp;
 
@@ -162,7 +164,11 @@ int main(int argc, char **argv) {
   }
 
   glfwMakeContextCurrent(window);
+#if TIMING
+  glfwSwapInterval(0);
+#else
   glfwSwapInterval(1);
+#endif
 
   // Capture the input events (e.g., keyboard)
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -183,7 +189,7 @@ int main(int argc, char **argv) {
 
   // Get a logfile
   FILE *logfile = fopen("log", "w");
-  if (!logfile){
+  if (!logfile) {
     printf("Could not open logfile");
     exit(1);
   }
@@ -205,14 +211,17 @@ int main(int argc, char **argv) {
 
     auto t_display = high_resolution_clock::now();
     display(window);
+#if TIMING
+    glFinish();
+#endif
 
     auto t_end = high_resolution_clock::now();
     auto d_held = duration_cast<microseconds>(t_update - t_begin).count();
     auto d_update = duration_cast<microseconds>(t_display - t_update).count();
     auto d_display = duration_cast<microseconds>(t_end - t_display).count();
     auto d_all = duration_cast<microseconds>(t_end - t_begin).count();
-    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", world->held.simulation_running, d_held, d_update,
-           d_display, d_all);
+    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", world->held.simulation_running,
+            d_held, d_update, d_display, d_all);
   }
 
   fclose(logfile);
