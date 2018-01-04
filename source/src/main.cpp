@@ -3,6 +3,7 @@
 #include "kernel.cuh"
 #include "state.hpp"
 #include "util.hpp"
+#include <chrono>
 
 using namespace std;
 using namespace agp;
@@ -134,6 +135,7 @@ void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
 }
 
 int main(int argc, char **argv) {
+  using namespace std::chrono;
   world = new WorldState(DEFAULT_NUM_PARTICLES);
 
   GLFWwindow *window = NULL;
@@ -185,12 +187,25 @@ int main(int argc, char **argv) {
   const float vel_step = 1e-1;
   first_update(world, vel_step);
   while (!glfwWindowShouldClose(window)) {
+    auto t_begin = high_resolution_clock::now();
     update_held(world, dt);
     t += dt;
+
+    auto t_update = high_resolution_clock::now();
     if (world->held.simulation_running) {
       update(world, vel_step);
     }
+
+    auto t_display = high_resolution_clock::now();
     display(window);
+
+    auto t_end = high_resolution_clock::now();
+    auto d_held = duration_cast<microseconds>(t_update - t_begin).count();
+    auto d_update = duration_cast<microseconds>(t_display - t_update).count();
+    auto d_display = duration_cast<microseconds>(t_end - t_display).count();
+    auto d_all = duration_cast<microseconds>(t_end - t_begin).count();
+    printf("%d,%d,%d,%d,%d\n", world->held.simulation_running, d_held, d_update,
+           d_display, d_all);
   }
 
   // Release all the allocated memory
