@@ -181,6 +181,13 @@ int main(int argc, char **argv) {
   // Initialize the 3D view
   init();
 
+  // Get a logfile
+  FILE *logfile = fopen("log", "w");
+  if (!logfile){
+    printf("Could not open logfile");
+    exit(1);
+  }
+
   // Launch the main loop for rendering
   float dt = 0.017;
   float t = 0.0f;
@@ -204,9 +211,11 @@ int main(int argc, char **argv) {
     auto d_update = duration_cast<microseconds>(t_display - t_update).count();
     auto d_display = duration_cast<microseconds>(t_end - t_display).count();
     auto d_all = duration_cast<microseconds>(t_end - t_begin).count();
-    printf("%d,%d,%d,%d,%d\n", world->held.simulation_running, d_held, d_update,
+    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", world->held.simulation_running, d_held, d_update,
            d_display, d_all);
   }
+
+  fclose(logfile);
 
   // Release all the allocated memory
   release();
