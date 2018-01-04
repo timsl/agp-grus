@@ -46,7 +46,7 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
     float KRPsmall = next_r > r && r <= D * (1.0 - SDP[tsmall]) ? KRP[tsmall] : 1.0;
     force -= dmr * (K[tsmall] * KRPsmall + K[tlarge] * KRPlarge);
   }
-  return dir * (float)force;
+  return dir * force;
 }
 
 __global__ void calculate_forces(const CUParticle *particles, float3 *forces,
