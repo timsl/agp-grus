@@ -32,3 +32,4 @@ source/bin/
 ..git
 /source/compile_commands.json
 /source/log
+/source/.Rhistory

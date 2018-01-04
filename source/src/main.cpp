@@ -31,8 +31,13 @@ void init() {
   // defined here! For the assignment, we only ask you to enable the
   // alpha channel.
 
+  // Enable alpha blending
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // Enable face culling
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
 
   // Init shaders. I let the program be global so I can delete it on exit.
   shader_program = agp::util::loadShaders(VERT_FILE, FRAG_FILE);
