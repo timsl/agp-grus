@@ -5,7 +5,7 @@
 #include "util.hpp"
 #include <chrono>
 
-#define TIMING 1
+#define TIMING 0
 
 using namespace std;
 using namespace agp;
@@ -18,7 +18,7 @@ GLuint shader_program;
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
 
-int DEFAULT_NUM_PARTICLES = 4000;
+int DEFAULT_NUM_PARTICLES = 10000;
 
 WorldState *world;
 
