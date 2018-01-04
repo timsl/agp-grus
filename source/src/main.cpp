@@ -191,7 +191,9 @@ int main(int argc, char **argv) {
 
   // Get a logfile
   FILE *logfile = fopen("log", "w");
-  if (!logfile) {
+  if (logfile) {
+    fprintf(logfile, "updating,held,update,display,all\n");
+  } else {
     printf("Could not open logfile");
     exit(1);
   }
@@ -202,12 +204,14 @@ int main(int argc, char **argv) {
   const float vel_step = 1e-1;
   first_update(world, vel_step);
   while (!glfwWindowShouldClose(window)) {
+    bool sim_running = world->held.simulation_running;
+
     auto t_begin = high_resolution_clock::now();
     update_held(world, dt);
     t += dt;
 
     auto t_update = high_resolution_clock::now();
-    if (world->held.simulation_running) {
+    if (sim_running) {
       update(world, vel_step);
     }
 
@@ -222,8 +226,8 @@ int main(int argc, char **argv) {
     auto d_update = duration_cast<microseconds>(t_display - t_update).count();
     auto d_display = duration_cast<microseconds>(t_end - t_display).count();
     auto d_all = duration_cast<microseconds>(t_end - t_begin).count();
-    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", world->held.simulation_running,
-            d_held, d_update, d_display, d_all);
+    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", sim_running, d_held, d_update,
+            d_display, d_all);
   }
 
   fclose(logfile);
