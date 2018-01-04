@@ -6,8 +6,7 @@
 #include <chrono>
 #include <sstream>
 
-#define TIMING 0
-
+int TIMING = 0;
 GLuint g_default_vao = 0;
 GLint color_loc = -1;
 GLint VP_loc = -1;
@@ -130,9 +129,10 @@ int main(int argc, char **argv) {
 
   size_t num_particles = 100000;
   size_t block_size = 32;
+  int runs = 0;
 
   // First arg number of particles, second block_size
-  if (argc > 3) {
+  if (argc > 4) {
     printf("More args than expected.\n");
     exit(1);
   }
@@ -149,6 +149,17 @@ int main(int argc, char **argv) {
       printf("arg 2 not a number\n");
       exit(1);
     }
+  }
+  if (argc >= 4) {
+    // Third is especially for the batch script, enabling timing and running a
+    // preset number of runs
+    std::istringstream ss(argv[3]);
+    if (!(ss >> runs)) {
+      printf("arg 3 not a number\n");
+      exit(1);
+    }
+
+    TIMING = 1;
   }
 
   world = new WorldState(num_particles, block_size);
@@ -177,11 +188,11 @@ int main(int argc, char **argv) {
   }
 
   glfwMakeContextCurrent(window);
-#if TIMING
-  glfwSwapInterval(0);
-#else
-  glfwSwapInterval(1);
-#endif
+  if (TIMING) {
+    glfwSwapInterval(0);
+  } else {
+    glfwSwapInterval(1);
+  }
 
   // Capture the input events (e.g., keyboard)
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -203,7 +214,7 @@ int main(int argc, char **argv) {
   // Get a logfile
   FILE *logfile = fopen("log", "w");
   if (logfile) {
-    fprintf(logfile, "updating,held,update,display,all\n");
+    fprintf(logfile, "updating,numparts,blocksize,held,update,display,all\n");
   } else {
     printf("Could not open logfile");
     exit(1);
@@ -215,7 +226,14 @@ int main(int argc, char **argv) {
   const float vel_step = 1e-1;
   first_update(world, vel_step);
   while (!glfwWindowShouldClose(window)) {
-    bool sim_running = world->held.simulation_running;
+    bool sim_running = world->held.simulation_running || TIMING;
+
+    if (TIMING) {
+      --runs;
+      if (runs <= 0) {
+        glfwSetWindowShouldClose(window, 1);
+      }
+    }
 
     auto t_begin = high_resolution_clock::now();
     update_held(world, dt);
@@ -228,17 +246,17 @@ int main(int argc, char **argv) {
 
     auto t_display = high_resolution_clock::now();
     display(window);
-#if TIMING
-    glFinish();
-#endif
+    if (TIMING) {
+      glFinish();
+    }
 
     auto t_end = high_resolution_clock::now();
     auto d_held = duration_cast<microseconds>(t_update - t_begin).count();
     auto d_update = duration_cast<microseconds>(t_display - t_update).count();
     auto d_display = duration_cast<microseconds>(t_end - t_display).count();
     auto d_all = duration_cast<microseconds>(t_end - t_begin).count();
-    fprintf(logfile, "%d,%ld,%ld,%ld,%ld\n", sim_running, d_held, d_update,
-            d_display, d_all);
+    fprintf(logfile, "%d,%lu,%lu,%ld,%ld,%ld,%ld\n", sim_running, num_particles,
+            block_size, d_held, d_update, d_display, d_all);
   }
 
   fclose(logfile);
