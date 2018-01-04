@@ -1,60 +1,51 @@
 #include "kernel.cuh"
 
 __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
-  static const double D = 376.78;
-  static const double epsilon = 47.0975;
-  static const double M[4] = {1.9549e20, 7.4161e19, 1.9549e20, 7.4161e19};
-  static const double K[4] = {5.8228e14, 2.29114e14, 5.8228e14, 2.29114e14};
-  static const double KRP[4] = {0.02, 0.01, 0.02, 0.01};
-  static const double SDP[4] = {0.002, 0.001, 0.002, 0.001};
-  static const double G = 6.67408e-20;
+  static const float D = 420;
+  static const float epsilon = 47.0975;
+  static const float M[4] = {1.9549e20, 7.4161e19};
+  static const float K[4] = {5.8228e14, 2.29114e14};
+  static const float KRP[4] = {0.02, 0.01};
+  static const float SDP[4] = {0.002, 0.001};
+  static const float G = 6.67408e-20;
 
   // These arbitrary scalings might not necessary if we use better
   // numerical techniques
-  static const double weirdscale1 = 1e-16;
-  static const double weirdscale2 = 1e-16;
+  static const float weirdscale1 = 1e-16;
+  static const float weirdscale2 = 1e-16;
 
   const auto diff = pj.pos - pi.pos;
   const auto next_diff =
       ((pj.pos + pj.velocity * 1e-5) - (pi.pos + pi.velocity * 1e-5));
 
-  double r = length(diff);
-  const double next_r = length(next_diff);
+  const int ti = pi.type >= 2 ? pi.type - 2 : pi.type;
+  const int tj = pj.type >= 2 ? pj.type - 2 : pj.type;
+
+  // Iron has a larger shell, and would get penetrated first in the
+  // ifs.  Largest iron=0, smallest silicate=1.  We can use these
+  // instead of ti, tj. If they're different then these will be the
+  // two different ones, if they're the same they will be equal to
+  // ti=tj.
+  const auto tlarge = min(ti, tj);
+  const auto tsmall = max(ti, tj);
+
+  float r = length(diff);
+  const float next_r = length(next_diff);
 
   const auto dir = diff / r;
-  double force = 0.0;
 
   // pre-computed values
   r = fmax(r, epsilon);
-  const double r2 = r * r;
-  const double gmm = G * M[pi.type] * M[pj.type] * (1 / r2) * weirdscale1;
-  const double dmr = (D * D - r2) * 0.5 * weirdscale2;
-  const double oneshell = fmin(SDP[pi.type], SDP[pj.type]);
-  const double twoshell = fmax(SDP[pi.type], SDP[pj.type]);
+  const float r2 = r * r;
+  const float gmm = G * M[ti] * M[tj] * (1 / r2) * weirdscale1;
+  const float dmr = (D * D - r2) * 0.5 * weirdscale2;
 
-  if (r >= D) {
-    // Not in contact
-    force = gmm;
-  } else if (r >= D - D * oneshell) {
-    // In contact, but no shell penetrated
-    force = gmm - dmr * (K[pi.type] + K[pj.type]);
-  } else if (r >= D - D * twoshell) {
-    // One shell has been penetrated
-    if (next_r < r) {
-      force = gmm - dmr * (K[pi.type] + K[pj.type]);
-    } else {
-      force = gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type]);
-    }
-  } else {
-    // Both shells penetrated (r > epsilon)
-    if (next_r < r) {
-      force = gmm - dmr * (K[pi.type] + K[pj.type]);
-    } else {
-      force =
-          gmm - dmr * (K[pi.type] * KRP[pi.type] + K[pj.type] * KRP[pj.type]);
-    }
+  float force = gmm;
+  if (r < D) {
+    float KRPlarge = next_r > r && r <= D * (1.0 - SDP[tlarge]) ? KRP[tlarge] : 1.0;
+    float KRPsmall = next_r > r && r <= D * (1.0 - SDP[tsmall]) ? KRP[tsmall] : 1.0;
+    force -= dmr * (K[tsmall] * KRPsmall + K[tlarge] * KRPlarge);
   }
-
   return dir * (float)force;
 }
 
