@@ -18,5 +18,6 @@ start/stop the simulation. R resets the camera if you end up lost
 `./bin/moon 1000 128` would instead run 1000 particles with a block size of 128.
 
 For scripting, a third parameter can be specified which then makes the program run that many iterations before quitting, and not syncing to the monitors refresh rate (vsync), to get better timings.
+
 A csv file called simply `log` is created in either case, which contains timings for different parts from each update iteration.
 
