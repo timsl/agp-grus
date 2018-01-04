@@ -50,6 +50,7 @@ struct WorldState {
 
   std::vector<Particle> particles;
   std::vector<glm::vec4> colors;
+  size_t block_size;
 
   Sphere *sphere;
 
@@ -61,7 +62,7 @@ struct WorldState {
   void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,
                      char prop_type, float omegau, bool use_rotation);
-  WorldState(int n) : particles(n), colors(4) {
+  WorldState(int n, int block_size) : particles(n), colors(4), block_size(block_size) {
     colors[0] = glm::vec4(0.83137f, 0.25098f, 0.14510f, 0.4f);
     colors[1] = glm::vec4(0.03922f, 0.20784f, 0.21176f, 0.4f);
     colors[2] = glm::vec4(0.84706f, 0.70588f, 0.36471f, 0.4f);

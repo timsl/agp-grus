@@ -42,8 +42,10 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
 
   float force = gmm;
   if (r < D) {
-    float KRPlarge = next_r > r && r <= D * (1.0 - SDP[tlarge]) ? KRP[tlarge] : 1.0;
-    float KRPsmall = next_r > r && r <= D * (1.0 - SDP[tsmall]) ? KRP[tsmall] : 1.0;
+    float KRPlarge =
+        next_r > r && r <= D * (1.0 - SDP[tlarge]) ? KRP[tlarge] : 1.0;
+    float KRPsmall =
+        next_r > r && r <= D * (1.0 - SDP[tsmall]) ? KRP[tsmall] : 1.0;
     force -= dmr * (K[tsmall] * KRPsmall + K[tlarge] * KRPlarge);
   }
   return dir * force;
@@ -109,7 +111,7 @@ __global__ void first_apply_forces(CUParticle *particles, float3 *forces,
 
 void first_update(WorldState *world, float dt) {
   const auto N = world->particles.size();
-  const auto block_size = 32;
+  const auto block_size = world->block_size;
 
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
                      block_size * sizeof(CUParticle)>>>(
@@ -123,7 +125,7 @@ void first_update(WorldState *world, float dt) {
 
 void update(WorldState *world, float dt) {
   const auto N = world->particles.size();
-  const auto block_size = 32;
+  const auto block_size = world->block_size;
 
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
                      block_size * sizeof(CUParticle)>>>(

@@ -4,6 +4,7 @@
 #include "state.hpp"
 #include "util.hpp"
 #include <chrono>
+#include <sstream>
 
 #define TIMING 0
 
@@ -14,8 +15,6 @@ GLuint shader_program;
 
 constexpr const char *FRAG_FILE = "src/shaders/frag.glsl";
 constexpr const char *VERT_FILE = "src/shaders/vert.glsl";
-
-int DEFAULT_NUM_PARTICLES = 10000;
 
 WorldState *world;
 
@@ -71,7 +70,7 @@ void init() {
   }
 
   world->sphere =
-      new Sphere(188.39f, 16, 8, 1, DEFAULT_NUM_PARTICLES, shader_program);
+      new Sphere(188.39f, 16, 8, 1, world->particles.size(), shader_program);
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
                   world->particles.size(), world->sphere->vbo_instanced);
 }
@@ -108,18 +107,6 @@ void display(GLFWwindow *window) {
 
   sphere_object->prepare_render();
 
-  // auto iter = sphere_object->particle_vbo_buffer;
-  // for (const auto &p : world->particles) {
-  //   glm::mat4 M = glm::translate(p.pos);
-  //   util::storeModelViewMatrix(M, iter);
-  //   util::storeByte(p.type, iter);
-  //   iter = (char *)iter + sphere_object->data_length;
-  // }
-
-  // util::updateVbo(sphere_object->vbo_instanced,
-  //                 sphere_object->particle_vbo_buffer,
-  //                 sphere_object->data_length * DEFAULT_NUM_PARTICLES);
-
   sphere_object->render();
   sphere_object->finish_render();
 
@@ -140,7 +127,31 @@ void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
 
 int main(int argc, char **argv) {
   using namespace std::chrono;
-  world = new WorldState(DEFAULT_NUM_PARTICLES);
+
+  size_t num_particles = 100000;
+  size_t block_size = 32;
+
+  // First arg number of particles, second block_size
+  if (argc > 3) {
+    printf("More args than expected.\n");
+    exit(1);
+  }
+  if (argc >= 2) {
+    std::istringstream ss(argv[1]);
+    if (!(ss >> num_particles)) {
+      printf("arg 1 not a number\n");
+      exit(1);
+    }
+  }
+  if (argc >= 3) {
+    std::istringstream ss(argv[2]);
+    if (!(ss >> block_size)) {
+      printf("arg 2 not a number\n");
+      exit(1);
+    }
+  }
+
+  world = new WorldState(num_particles, block_size);
 
   GLFWwindow *window = NULL;
 
