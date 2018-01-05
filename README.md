@@ -1,4 +1,11 @@
 # agp-grus
+
+## Team Grus - DD2360
+Konrad Magnusson
+Tim Olsson
+Alex Sundström
+Victor Ähdel
+
 ## Running
 You will need `glm`, `glfw`, `OpenGL`, and `CUDA` installed somewhere in PATH.
 
