@@ -58,7 +58,11 @@ all <- updating %>%
               mdi=mean(display), sdi=sd(display))
 all %>% print(n = nrow(.))
 
+## means
 all %>% select(numparts,blocksize,mup) %>% spread(blocksize, mup)
+
+## stddev
+all %>% select(numparts,blocksize,sup) %>% spread(blocksize, sup)
 
 a <- aes(x=numparts, y=mup, color=blocksize)
 logx <- scale_x_continuous(trans="log2")
@@ -76,3 +80,19 @@ logy <- scale_y_continuous(trans="log2")
 all %>%
     mutate(blocksize=as.character(blocksize)) %>%
     ggplot(a) + geom_line() + logx + logy
+ggsave("plot.pdf", width=10, height=7)
+
+## Mean display time, not very interesting though
+## all %>%
+##     group_by(numparts) %>%
+##     summarize(mean_display_time=mean(mdi)) %>%
+##     ggplot(aes(x=numparts, y=mean_display_time)) + geom_line() + logx + logy
+
+data %>%
+    group_by(numparts) %>%
+    summarize(mean_display_time=mean(display), stddev_display_time=sd(display))
+
+
+data %>%
+    group_by(numparts) %>%
+    summarize(mean(update), sd(update))
