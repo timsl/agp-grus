@@ -64,6 +64,14 @@ a <- aes(x=numparts, y=mup, color=blocksize)
 logx <- scale_x_continuous(trans="log2")
 logy <- scale_y_continuous(trans="log2")
 
+## spline maybe
+## data %>%
+##     filter(blocksize==256) %>%
+##     ggplot(aes(x=numparts, y=update)) +
+##     geom_point() +
+##     geom_smooth() +
+##     logx + logy
+
 
 all %>%
     mutate(blocksize=as.character(blocksize)) %>%
