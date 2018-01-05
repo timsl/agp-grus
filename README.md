@@ -2,8 +2,11 @@
 
 ## Team Grus - DD2360
 Konrad Magnusson
+
 Tim Olsson
+
 Alex Sundström
+
 Victor Ähdel
 
 ## Running
