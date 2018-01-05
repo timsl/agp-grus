@@ -6,7 +6,14 @@ library("tidyverse")
 library("broom")
 library("magrittr")
 
-data <- read_csv("log")
+file <- "sumlog"
+
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) >= 1){
+    file <- args[1]
+}
+
+data <- read_csv(file)
 
 updating <- data %>%
     filter(updating==1) %>%
@@ -45,7 +52,19 @@ if (testing) {
         summarize(mean(display), sd(display))
 }
 
-updating %>%
-    summarize(mean(update), sd(update),
-              mean(display), sd(display))
+all <- updating %>%
+    group_by(numparts, blocksize) %>%
+    summarize(mup=mean(update), sup=sd(update),
+              mdi=mean(display), sdi=sd(display))
+all %>% print(n = nrow(.))
 
+all %>% select(numparts,blocksize,mup) %>% spread(blocksize, mup)
+
+a <- aes(x=numparts, y=mup, color=blocksize)
+logx <- scale_x_continuous(trans="log2")
+logy <- scale_y_continuous(trans="log2")
+
+
+all %>%
+    mutate(blocksize=as.character(blocksize)) %>%
+    ggplot(a) + geom_line() + logx + logy
