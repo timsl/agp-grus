@@ -16,6 +16,7 @@
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
 \usepackage{tabu}
 \usepackage{tikz}
+\usepackage{subfig}
 
 \title{DD2360 Project}
 \author{Victor Ähdel, Tim Olsson, Alex Sundström, Konrad Magnusson}
@@ -31,13 +32,10 @@ This theory originated from the fact that the earth and moon share a lot of isot
 The replication is implemented using Cuda and OpenGL.
 Our work amounted in the open-sourced code at \url{https://github.com/timsl/agp-grus}.
 
-
-
-
 \subsection{Scope}
 
 Due to the limited time frame of the project, we restrict ourselves to shorter runs than in the original article.
-As the original authors ran some simulations for 720 hours while using 100k particles, it is simply infeasible for us to do the same.
+As the original authors ran some simulations for 720 hours while using 131072 particles, it is simply infeasible for us to do the same.
 Furthermore, we are not able to search the parameter space as extensively due to time constraints, so we might not necessarily end up with as good parameters as the original authors for the smaller number of particles.
 
 \section{Methodology}
@@ -106,15 +104,15 @@ By extension, we do not perform any such optimizations either, and so that compu
 
 We therefore use CUDA in order to leverage more power for the n-body force calculations.
 Our algorithm is loosely based on the examples in the Nvidia Gems book chapter 31 \cite{nvidia_gems}.
-We started out without looking at the book by just computing the forces necessary by running one kernel per particle, which implies that we just need to iterate through every other particle in that kernel.
+We started out without looking at the book by just computing the forces necessary by running one kernel per particle, which implies that we need to iterate through every other particle in that kernel while grabbing its data from global memory.
 That code happened to do pretty much the same things as in the book, aside from the shared memory usage which afterwards was rather easy to add on.
-The change affected the performance only very slightly though, probably due to how well modern GPGPU drivers cache things anyway when there is free shared memory to use.
+The change affected the performance only slightly though, probably due to how well modern GPGPU drivers cache things anyway when there is free shared memory to use.
 Our code should therefore now do the same work as in the article, but it is not structured exactly the same.
 
 In order to improve the performance of the code, we optimized the code by eliminating slow performing function calls with simpler ones.
 The code bottlenecks were found using the profilers \verb|nvprof| and the NVIDIA Visual Profiler.
 One necessary optimization was to eliminate all usages of \verb|pow()|, as that was seen to take a long time.
-Normally such changes would seem to be a "micro-optimization", and you would prefer that the code remains as close to the mathematics as possible, but in this case it made too much of a difference.
+Normally such changes would seem to be a ``micro-optimization'', and you would prefer that the code remains as close to the mathematics as possible, but in this case it made too much of a difference.
 It ended up approximately reducing the time needed for the n-body computations to a tenth of the original.
 
 In addition, we also tried to reduce the amount of branching as much as possible by not having if-statements for the particle types as well as pre-computing common values.
@@ -135,8 +133,8 @@ Similarly, rotations left or right simply rotate the forward vector about the up
 
 \subsection{OpenGL}
 
-To handle the visualization of the particles we used OpenGL\cite{opengl}. 
-As a starting point a code skeleton of the GLFW verion of the OpenGL lab was used. 
+To handle the visualization of the particles we used OpenGL~\cite{opengl}. 
+As a starting point the code skeleton from the GLFW version of the OpenGL lab was used. 
 To improve performance a sphere struct was created which handled the rendering. 
 Beyond that instanced rendering and face culling was also added. 
 
@@ -158,14 +156,14 @@ It would be better if all the relevant data was pushed to the GPU once and we is
 Instanced rendering does exactly that. 
 
 To achieve instanced rendering we use one large VBO which houses four floats and one unsigned integer for every particle. 
-This is different from the recommended shader storage buffer object (SSBO) approach, where we can define the necessary data like structs, but it works quite well. 
+This is different from the recommended shader storage buffer object (SSBO) approach, where we can define the necessary data as structs, but it works quite well. 
 The floats are the particles position in homogeneous coordinates and the integer the type of particle (used for deciding which color to render it with). 
 This second VBO is as such of length $4 \times GL\_FLOAT + GL\_UNSIGNED\_INT$ times the number of particles. 
-The type data (which is in the int) theoretically fits into just 2 bits (2 elements types, 2 planets), but we needed to align the data to a 32-bit boundary in order for the later parts in CUDA to work.
+The type data (which is in the int) theoretically fits into just 2 bits (2 elements types, 2 planets), but we needed to align the data to a 32-bit boundary anyways.
 An illustration of the structure of this VBO can be seen in Figure \ref{instanced_figure}.
 By adding a stride and offset with \verb|glVertexAttribPointer| and setting \verb|glVertexAttribDivisor| to one OpenGL will know that this is a instanced buffer. 
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 
 \begin{tikzpicture}
@@ -195,11 +193,11 @@ Note that this illustration only shows the data needed for three spheres, when i
 When we then render the particles we first update this large VBO. 
 Then we compute a view-projection matrix which we send as a uniform to the OpenGL vertex shader. 
 When\\ \verb|glDrawElementsInstanced| is called OpenGL will draw the same vertices stored in the first VBO but will step through the second VBO to find the position and type of the particle. 
-In the vertex shader we have to define two new in paramters with thier own locations, one for a \verb|vec4| and one for a \verb|uint|. 
-The \verb|vec4| is used for calculating the particles position and the \verb|uint| is sent to the fragment shader as an \emph{flat out} parameter, to indicate that it is an integer.  
+In the vertex shader we have to define two new \emph{in} paramters with their own locations, one for a \verb|vec4| and one for a \verb|uint|. 
+The \verb|vec4| is used for calculating the particles position and the \verb|uint| is sent to the fragment shader as an \emph{out} parameter with the \emph{flat} prefix to make sure no interpolation in done (since it is an integer value).   
 
 Note that we issue more then one call on the CPU side for every render cycle because of the nature of the \verb|GLUTSolidSphere| code we based our rendering on.
-The number of calls depends on how many "\emph{stacks}" the spheres have.
+The number of calls depends on how many ``\emph{stacks}'' the spheres have.
 Even so the rendering is still very fast even as the number of particles start to scale to over 100,000. 
 
 \subsubsection{Face Culling}
@@ -227,7 +225,25 @@ This was done using some pointer math and required that the data types in the VB
 
 \section{Simulation Results}
 
+\subsection{Creation of the moon}
+
+Some promising results can be seen in figure \ref{fig:sim}. Here we are running the simulation with 32768 particles. In the top left image we have the simulation at the first time-step, at the initialization. In the top right image we are a few time steps later in the simulation, and we can see the first impact of the two planets. In (c), we observe the planets a bit later into the collision. In (d), several time steps later, we can see a planet, and something moonlike further away to the top-right of this image.
+
+\begin{figure}[h]%
+    \centering
+     \subfloat[Initialization]{{\includegraphics[height=5cm, width=7cm]{1.png} }}%
+     \qquad
+    \subfloat[First impact]{{\includegraphics[height=5cm, width=7cm]{2.png} }}%
+    \qquad
+    \subfloat[After collision]{{\includegraphics[height=5cm, width=7cm]{3.png} }}%
+    \qquad
+    \subfloat[Planet and something moonlike]{{\includegraphics[height=5cm, width=7cm]{4.png} }}%
+    \caption{Images from a simulation with 32768 particles. Each planets type of element has a different color.}%
+    \label{fig:sim}%
+\end{figure}
+
 \subsection{Parameters}
+
 The simulation was very sensitive to the time step parameter. 
 In the original report a timestep of $5.8117$ seconds was used \cite{simulation_paper}. 
 However with such a large step size the particles were more likely to just scatter away. 
@@ -235,14 +251,6 @@ This is possibly because they then more often ended up penetrating both shells i
 We had more success with a lower time step, which made more particle interactions start while they barely touched each other, which implies that the inner shells were less often penetrated as the first thing, and therefore the elastic forces were at play.
 With the lower timestep, it also means that generally lower forces will be applied when particles start to collide, and the system stays more stable.
 
-\subsection{Creation of the moon}
-TODOTIM 
-
-utveckling 100k partiklar, ingen måne, 
-
-our simulation ended up seeming very reasonable, but we did not find the exact parameters that created a moon
-
-here are nice images though::::
 
 
 \section{Performance Results}
@@ -263,7 +271,7 @@ Table \ref{nvprof} shows the relative time taken by the kernels for a run with 6
 Table \ref{opengltime} summarizes the performance of the OpenGL part depending also on the number of particles.
 There we can see that the time scales approximately linearly with the number of particles.
 
-\begin{table}[ht]
+\begin{table}[h]
 \center
 \begin{tabu} to \textwidth {r|rrrrrrrr}
   Particles &   8 &  16 & 32 &  64 & 128 & 256 & 512 &1024 \\
@@ -280,14 +288,14 @@ There we can see that the time scales approximately linearly with the number of 
 \label{cudatime}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[h]
 \center
 \includegraphics[width=0.8\textwidth]{plot}
 \caption{Plot of the mean update time (CUDA part), dependent on the number of particles and block size. Times are in microseconds. Both axes are in log 2.}
 \label{cudatimeplot}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[h]
 \center
 \begin{tabu} to \textwidth {l|rr}
   Kernel & Time & \%\\
@@ -300,7 +308,7 @@ There we can see that the time scales approximately linearly with the number of 
 \label{nvprof}
 \end{table}
 
-\begin{table}[ht]
+\begin{table}[h]
 \center
 \begin{tabu} to \textwidth {r|rr}
 Particles & Mean & Std.Dev. \\
