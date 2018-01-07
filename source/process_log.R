@@ -79,7 +79,9 @@ logy <- scale_y_continuous(trans="log2")
 
 all %>%
     mutate(blocksize=as.character(blocksize)) %>%
-    ggplot(a) + geom_line() + logx + logy
+    ggplot(a) + geom_line() + logx + logy +
+    xlab("Number of particles") +
+    ylab("Average time in us")
 ggsave("plot.pdf", width=10, height=7)
 
 ## Mean display time, not very interesting though
