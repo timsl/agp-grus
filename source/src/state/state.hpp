@@ -64,10 +64,12 @@ struct WorldState {
 
   Sphere *sphere;
 
+  // Creates the planets from the particles as specified in the report
   void create_planets(std::vector<Particle> &particles, float radius_1,
                       float radius_2, float procent_iron,
                       glm::vec3 planet_1_origin, glm::vec3 planet_2_origin,
                       bool use_rotation);
+  // Helper function for creating the planets
   template <typename Iter>
   void create_sphere(Iter start, Iter end, float radius_1, float radius_2,
                      glm::vec3 planet_origin, glm::vec3 inital_velocity,

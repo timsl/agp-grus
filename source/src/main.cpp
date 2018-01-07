@@ -68,8 +68,10 @@ void init() {
     glUniform4fv(color_loc, 4, colorvec.data());
   }
 
+  // Init sphere which takes care of rendering 
   world->sphere =
       new Sphere(188.39f, 16, 8, 1, world->particles.size(), shader_program);
+  // Init the gpu state which takes care of the cuda part
   world->gpu.init(reinterpret_cast<const CUParticle *>(world->particles.data()),
                   world->particles.size(), world->sphere->vbo_instanced);
 }

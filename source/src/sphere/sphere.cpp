@@ -106,8 +106,10 @@ Sphere::Sphere(GLfloat radius, GLint slices, GLint stacks, int n,
   GLsizei stride = data_length;
   int type_offset = 4 * sizeof(GL_FLOAT);
 
+  // creates our vec4 attribute
   util::addInstancedAttribute(vao_sphere, vbo_instanced, 1, 4, stride, 0,
                               false);
+  // creates our uint attribute
   util::addInstancedAttribute(vao_sphere, vbo_instanced, 2, 1, stride,
                               type_offset, true);
 
