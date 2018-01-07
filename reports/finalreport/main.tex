@@ -29,13 +29,13 @@
 In this project we aim to replicate the results in \emph{N-Body Simulation of the Formation of the Earth-Moon System} \cite{simulation_paper}.
 The paper is trying to simulate the giant impact hypothesis, which claims that the creation of our earth and moon stems from the collision of two earth sized planets.
 This theory originated from the fact that the earth and moon share a lot of isotopes, however the moon has a lot less iron.
-The replication is implemented using Cuda and OpenGL.
+The replication is implemented using CUDA and OpenGL.
 Our work amounted in the open-sourced code at \url{https://github.com/timsl/agp-grus}.
 
 \subsection{Scope}
 
 Due to the limited time frame of the project, we restrict ourselves to shorter runs than in the original article.
-As the original authors ran some simulations for 720 hours while using 131072 particles, it is simply infeasible for us to do the same.
+As the original authors ran some simulations for 720 hours while using 131072 particles, it is infeasible for us to do the same.
 Furthermore, we are not able to search the parameter space as extensively due to time constraints, so we might not necessarily end up with as good parameters as the original authors for the smaller number of particles.
 
 \section{Methodology}
@@ -46,14 +46,14 @@ Rendering the simulation is achieved with OpenGL \cite{opengl}, using GLFW for t
 \subsection{Model}
 
 We follow the model outlined in \cite{simulation_paper} but with a few modifications to enable completing the simulation in less time.
-Their model is a normal n-body simulation, and all the particle interactions are summarized in `Table 2: Force function' in \cite{simulation_paper}.
+Their model is a normal N-body simulation, and all the particle interactions are summarized in `Table 2: Force function' in \cite{simulation_paper}.
 
 \subsection{Initialization Of Planets}
 
-The planets consist of two different types of particles, iron particles which form the inner core and silicate particles which form an outer shell. 
+The planets consist of two different types of particles: iron particles which form the inner core, and silicate particles which form an outer shell. 
 We begin by initializing the particles' positions by randomly sampling in spherical coordinates. 
 For the inner core we sample from a spherical source. 
-This is done by firstly uniformly sampling three numbers between 0 and 1, in equations 1-3 referred to as $\rho_1$, $\rho_2$, and $\rho_3$. 
+This is done by firstly uniformly sampling three numbers between 0 and 1, in equations 1-4 referred to as $\rho_1$, $\rho_2$, and $\rho_3$. 
 After that we calculate the particles' positions using the following equations:
 
 \begin{equation}
@@ -65,9 +65,12 @@ y = rsin\theta sin\phi = R\rho^{1/3}_{1}(1-\mu^{2})^{1/2}sin(2\pi\rho_{3})
 \begin{equation}
 z = rcos\theta = R\rho^{1/3}_{1}\mu
 \end{equation}
+\begin{equation}
+\text{where:} \mu = (1-2\rho_2)
+\end{equation}
 
-The outer shell we distribute the particles according to a random shell distribution. 
-Similarly to the inner shell, we begin by uniformly sampling three numbers between 0 and 1, $\rho_1$, $\rho_2$, $\rho_3$ in equation 4-6. 
+The outer shell we distribute the particles according to a random shell distribution with radii between $R_1$ and $R_2$. 
+Similarly to the inner shell, we begin by uniformly sampling three numbers between 0 and 1, $\rho_1$, $\rho_2$, $\rho_3$ in equation 5-8. 
 We then calculate the positions using the following equations:
 
 \begin{equation}
@@ -77,19 +80,22 @@ x = rsin\theta cos\phi = [R^3_1 + (R^3_2 - R^3_1)\rho_1)]^{1/3}(1 - \mu^2)^{1/2}
 y = rsin\theta sin\phi = [R^3_1 + (R^3_2 - R^3_1)\rho_1)]^{1/3}(1 - \mu^2)^{1/2}sin(2\pi\rho_3)
 \end{equation}
 \begin{equation}
-z = rcos\theta = [R^3_1 + (R^3_2 - R^3_1)\rho]^{1/3}\mu
+z = rcos\theta = [R^3_1 + (R^3_2 - R^3_1)\rho_1]^{1/3}\mu
+\end{equation}
+\begin{equation}
+\text{where:} \mu = (1-2\rho_2)
 \end{equation}
 
 
-As the simulations start after the collision, the initial particle velocities of the two planets are opposite of each other. 
+As the simulations start after the collision, the initial particle velocities of the two planets are opposite to each other. 
 The initial velocities of each particle has to take into account the impact and the rotational velocities as they were rotating around the Y axis. 
 The rotational velocity is computed by firstly calculating the distance to the center of mass, followed by calculating the angle and finally adding the rotational velocity. 
-The impact velocity is added to the x velocity as a factor of $+/- 3.2416 km/s$ depending on which planet the particle belongs to.
+The impact velocity is added to the x velocity as a factor of $\pm 3.2416 km/s$ depending on which planet the particle belongs to.
 
 \begin{center}
 $r = \sqrt{((x - \bar{x})^2 + (z - \bar{z})^2)}$ \\
 $\theta = \arctan((z - \bar{z})/(x - \bar{x}))$ \\
-$x_{velocity} = +/-3.2416 + omega*r_xz*sin(theta)$ \\
+$x_{velocity} = \pm 3.2416 + omega*r_xz*sin(theta)$ \\
 $y_{velocity} = -omega*r_xz*cos(theta)$ \\
 \end{center}
 
@@ -97,7 +103,7 @@ $y_{velocity} = -omega*r_xz*cos(theta)$ \\
 \subsection{CUDA}
 
 The most significant part of the computation that needs to be done for the simulation is in the force calculations between the particles.
-Generally in n-body simulations each particle affects each other particle with for example gravity.
+Generally in N-body simulations every particle affects each other particle with for example gravity.
 This implies that the computational complexity is $O(n^2)$.
 While there are ways of reducing the computations necessary, the original paper claims to not do any such optimizations, in order to keep a maximal amount of accuracy in the simulation.
 By extension, we do not perform any such optimizations either, and so that computation is by far the biggest bottleneck in achieving a performant simulation.
@@ -141,10 +147,10 @@ Beyond that instanced rendering and face culling was also added.
 \subsubsection{The Sphere Struct}
 \label{sphere_struct}
 
-The sphere struct holds it's own vertex array object (VAO) which in turn has two vertex array buffers (VBO). 
-The first of these buffers is used for storing the vertices of the sphere and the second for the instanced rendering (see section \ref{instanced}). 
-To create the vertices we use the same code as in the OpenGL labs \verb|GLUTSolidSphere| function. 
-However since we only set up these vertices once and reuse them we save on performance.
+The sphere struct holds its own vertex array object (VAO) which in turn has two vertex array buffers (VBO) already there from the \verb|GLUTSolidSphere| used in the labs and one additonal we created. 
+The first two of these buffers is used for storing the vertices and indices for rendering sphere and the third for the instanced rendering (see section \ref{instanced}). 
+To create the vertices and indicies we use the same code as in the OpenGL labs \verb|GLUTSolidSphere| function. 
+However since we only set up these values once and reuse them we save on performance.
 When we close the application the struct will delete both the VBOs and the VAO. 
 
 \subsubsection{Instanced Rendering}
@@ -156,9 +162,7 @@ It would be better if all the relevant data was pushed to the GPU once and we is
 Instanced rendering does exactly that. 
 
 To achieve instanced rendering we use one large VBO which houses four floats and one unsigned integer for every particle. 
-This is different from the recommended shader storage buffer object (SSBO) approach, where we can define the necessary data as structs, but it works quite well. 
 The floats are the particles position in homogeneous coordinates and the integer the type of particle (used for deciding which color to render it with). 
-This second VBO is as such of length $4 \times GL\_FLOAT + GL\_UNSIGNED\_INT$ times the number of particles. 
 The type data (which is in the int) theoretically fits into just 2 bits (2 elements types, 2 planets), but we needed to align the data to a 32-bit boundary anyways.
 An illustration of the structure of this VBO can be seen in Figure \ref{instanced_figure}.
 By adding a stride and offset with \verb|glVertexAttribPointer| and setting \verb|glVertexAttribDivisor| to one OpenGL will know that this is a instanced buffer. 
@@ -192,7 +196,7 @@ Note that this illustration only shows the data needed for three spheres, when i
 
 When we then render the particles we first update this large VBO. 
 Then we compute a view-projection matrix which we send as a uniform to the OpenGL vertex shader. 
-When\\ \verb|glDrawElementsInstanced| is called OpenGL will draw the same vertices stored in the first VBO but will step through the second VBO to find the position and type of the particle. 
+When\\ \verb|glDrawElementsInstanced| is called OpenGL will draw the same vertices stored in the first VBO but will step through the third VBO to find the position and type of the particle. 
 In the vertex shader we have to define two new \emph{in} paramters with their own locations, one for a \verb|vec4| and one for a \verb|uint|. 
 The \verb|vec4| is used for calculating the particles position and the \verb|uint| is sent to the fragment shader as an \emph{out} parameter with the \emph{flat} prefix to make sure no interpolation in done (since it is an integer value).   
 
@@ -201,9 +205,10 @@ The number of calls depends on how many ``\emph{stacks}'' the spheres have.
 Even so the rendering is still very fast even as the number of particles start to scale to over 100,000. 
 
 \subsubsection{Face Culling}
+Face culling is a technique where polygons are evaluated as facing towards or away from the camera. The way this is done is by comparing the order in which the vertices appear when projected onto the camera to the order the user specified. If the user defined the polygon in a clockwise manner and the face appears in a counter clockwise order, the face is turned away from the camera and can be assumed to not need rendering. This should drastically reduce the amount of polygons scheduled for rendering, resulting in a performance increase.
 
 We turned on face culling by calling \verb|glEnable(GL_CULL_FACE)| and \verb|glCullFace(GL_BACK)| during the initialization of the program. 
-Turning the face culling on provided an approximate $32$ percent performance boost to the OpenGL rendering. 
+Turning the face culling on provided an approximate $32$ percent performance boost to the OpenGL rendering.
 
   
 
@@ -333,6 +338,7 @@ Hence, we believe that the simulation method is very promising, and can certainl
 
 The usage of GPGPU methods for the simulation was certainly key to enable the program to perform efficiently enough for reasonably fast simulation and parameter searching.
 The simulation could definitely not have been done if we could not make usage of our GPUs, as we would then need supercomputer-grade CPUs for the simulation to complete in a reasonable time frame.
+Even though we still use the $O(n^2)$ the simulation runs quite fast, and we do not see many further possible optimizations while sticking to the all-pairs simulation.
 
 It is as of yet unclear whether it was necessary to do the full $n^2$ particle computation, or if it might have been possible to use other optimizations while ending up with the same result.
 It would be interesting to see if the simulation would still work well using hierarchical approaches with far-field approximations, that split the particles into groups and then approximate the forces against particles far away, instead of doing the all-pair version.
@@ -347,6 +353,7 @@ To implement this in a proper manner triple buffering of the larger VBO mentione
 \section{Contribution of each member}
 The team members all did a similar amount of work.
 We most often used pair programming and mutually discussed the code while actually writing it on the computers with the most comfortable CUDA environment, so the git log is very inaccurate as to our work split.
+
 
 \bibliographystyle{apalike}
 \bibliography{sample}
