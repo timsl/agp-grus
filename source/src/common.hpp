@@ -18,9 +18,6 @@
 #include <unistd.h>
 #include <vector>
 
-#define PATH_MAX 4096
-#define GL_SUCCESS 0
-
 typedef uint8_t BYTE;
 
 #endif

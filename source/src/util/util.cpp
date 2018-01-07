@@ -140,19 +140,3 @@ void util::addInstancedAttribute(GLuint vao, GLuint vbo, int attribute,
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
-
-// void util::updateVbo(GLuint vbo, void *data, int nr) {
-//   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//   glBufferData(GL_ARRAY_BUFFER, nr, NULL, GL_STREAM_DRAW);
-//   glBufferSubData(GL_ARRAY_BUFFER, 0, nr, data);
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
-// }
-
-// void util::storeModelViewMatrix(glm::mat4 MV, void *to_ptr) {
-//   auto *floats_ptr = glm::value_ptr(MV[3]);
-//   std::copy(floats_ptr, floats_ptr + 4, (float*)to_ptr);
-// }
-
-// void util::storeByte(char b, void *to_ptr) {
-//   *((char*)to_ptr + 16) = b;
-// }

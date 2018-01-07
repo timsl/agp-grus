@@ -4,6 +4,8 @@
 // HEADER-ONLY probably. Needed to avoid a circular dependency between
 // input and state
 
+// struct for the actions of keys that can be held, such that the
+// camera can keep moving if a key is held.
 struct HeldActions {
   // 6 dirs
   bool move_right = false;

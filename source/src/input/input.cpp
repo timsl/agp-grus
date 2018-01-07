@@ -7,10 +7,10 @@ void resize_callback(GLFWwindow *win, int width, int height,
   glViewport(0, 0, width, height);
 }
 
-// Handle keypresses. Generally only one action per keypress, so we can return
-// if anything matches.
 void keyboard_callback(GLFWwindow *win, int key, int action,
                        WorldState *world) {
+  // Generally only one action per keypress, so we can return if
+  // anything matches.
 
   // Keys that act when held down. REPEAT is considered the same as
   // press since the held thingies should be idempotent anyways.

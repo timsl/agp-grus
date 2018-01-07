@@ -19,9 +19,9 @@ make run
 ```
 
 Use the mouse (or arrow keys) to look around, and W/A/S/D/CTRL/SHIFT
-to pan around. Further, press dot for a single update step or P to
-start/stop the simulation. R resets the camera if you end up lost
-(though the planets may have moved away).
+to pan around. Q/E to roll. Further, press dot for a single update
+step or P to start/stop the simulation. R resets the camera if you end
+up lost (though the planets may have moved away).
 
 ## Command line arguments
 `make run` will run with a default number of particles and block size (number of kernels that share memory and synchronize in the CUDA part), but those parameters can otherwise be specified from the command line.
