@@ -127,8 +127,8 @@ void cursor_callback_h(GLFWwindow *win, double xpos, double ypos) {
 int main(int argc, char **argv) {
   using namespace std::chrono;
 
-  size_t num_particles = 100000;
-  size_t block_size = 32;
+  size_t num_particles = 32768;
+  size_t block_size = 1024;
   int runs = 0;
 
   // First arg number of particles, second block_size

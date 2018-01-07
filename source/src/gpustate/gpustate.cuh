@@ -16,12 +16,18 @@ inline void exit_if_cuda_err(cudaError_t code, const char *file, int line) {
   }
 }
 
+// Same struct as on CPU-side, but using float3.  Since float3 and
+// glm::vec3 are memory-compatible, the entire structs will be
+// memory-compatible. Using float3 while doing work in CUDA is faster
+// though, hence this struct.
 struct CUParticle {
   float3 pos;
   float3 velocity;
   char type;
 };
 
+// Class containing the allocations of the CUDA device, necessary for
+// the kernels to have something to run on.
 struct GPUState {
   CUParticle *particles = 0;
   float3 *velocities = 0;

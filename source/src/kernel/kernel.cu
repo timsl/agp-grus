@@ -121,6 +121,9 @@ void first_update(WorldState *world, float dt) {
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);
+
+  // Synchronize CUDA so that the timings are correct
+  CUDAERR(cudaDeviceSynchronize());
 }
 
 void update(WorldState *world, float dt) {
@@ -136,9 +139,6 @@ void update(WorldState *world, float dt) {
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);
 
+  // Synchronize CUDA so that the timings are correct
   CUDAERR(cudaDeviceSynchronize());
-
-  // CUParticle *cast = reinterpret_cast<CUParticle *>(world->particles.data());
-  // CUDAERR(cudaMemcpy(cast, world->gpu.particles, N * sizeof(*cast),
-  //                    cudaMemcpyDeviceToHost));
 }
