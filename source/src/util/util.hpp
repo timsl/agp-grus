@@ -28,14 +28,6 @@ GLuint createEmptyVbo(int nr_floats);
 void addInstancedAttribute(GLuint vao, GLuint vbo, int attribute, int dataSize,
                            GLsizei stride, size_t offset, bool integral);
 
-/**
- * Helper method to update our vbo for instanced rendering
- */
-//void updateVbo(GLuint vbo, void *data, int nr);
-//void storeModelViewMatrix(glm::mat4 MV, void *to_Ptr);
-//void storeByte(char b, void *to_ptr);
-
-void bindAttrib(GLuint program, int attribute, char *variable_name);
 } // namespace util
 } // namespace agp
 
