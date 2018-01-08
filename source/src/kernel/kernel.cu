@@ -116,11 +116,14 @@ void first_update(WorldState *world, float dt) {
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
                      block_size * sizeof(CUParticle)>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
+  CUDAERR(cudaPeekAtLastError());
   first_apply_forces<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
+  CUDAERR(cudaPeekAtLastError());
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);
+  CUDAERR(cudaPeekAtLastError());
 
   // Synchronize CUDA so that the timings are correct
   CUDAERR(cudaDeviceSynchronize());
@@ -133,11 +136,14 @@ void update(WorldState *world, float dt) {
   calculate_forces<<<(N + block_size - 1) / block_size, block_size,
                      block_size * sizeof(CUParticle)>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
+  CUDAERR(cudaPeekAtLastError());
   apply_forces<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.velocities, N, dt);
+  CUDAERR(cudaPeekAtLastError());
 
   update_GL<<<(N + block_size - 1) / block_size, block_size>>>(
       world->gpu.particles, world->gpu.glptr, N);
+  CUDAERR(cudaPeekAtLastError());
 
   // Synchronize CUDA so that the timings are correct
   CUDAERR(cudaDeviceSynchronize());
