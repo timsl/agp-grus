@@ -1,6 +1,7 @@
 #include "kernel.cuh"
 
-__device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
+__device__ float3 body_body_interaction(const CUParticle pi,
+                                        const CUParticle pj) {
   static const float D = 420;
   static const float epsilon = 47.0975;
   static const float M[4] = {1.9549e20, 7.4161e19};
@@ -29,13 +30,12 @@ __device__ float3 body_body_interaction(CUParticle pi, CUParticle pj) {
   const auto tlarge = min(ti, tj);
   const auto tsmall = max(ti, tj);
 
-  float r = length(diff);
+  const float r = fmax(length(diff), epsilon);
   const float next_r = length(next_diff);
 
   const auto dir = diff / r;
 
   // pre-computed values
-  r = fmax(r, epsilon);
   const float r2 = r * r;
   const float gmm = G * M[ti] * M[tj] * (1 / r2) * weirdscale1;
   const float dmr = (D * D - r2) * 0.5 * weirdscale2;
